@@ -127,3 +127,24 @@ ccml/
 - Explicit data flow only
 - No hidden runtime dependency
 - No public behavior without documentation and tests
+
+## 7. Crate Ownership Table (Week 1 Freeze)
+1. `core/rust/crates/ccml-core`
+- Responsibility: parser/AST/diagnostics/transcoding source of truth
+- Exposes: `parse`, `to_json`, `diagnose`
+- Must not depend on: binding-specific runtime logic
+
+2. `core/rust/crates/ccml-cli`
+- Responsibility: command-line entry point and UX
+- Depends on: `ccml-core`
+- Must not implement: grammar or semantic rules on its own
+
+3. `core/rust/crates/ccml-ffi`
+- Responsibility: stable FFI surface for non-Rust bindings
+- Depends on: `ccml-core`
+- Must keep: narrow and versionable ABI
+
+4. `core/rust/crates/ccml-wasm`
+- Responsibility: WASM bridge for browser/JS runtime usage
+- Depends on: `ccml-core`
+- Must not diverge: behavior from core conformance rules
