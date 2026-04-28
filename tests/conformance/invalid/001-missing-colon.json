@@ -1,0 +1,16 @@
+{
+  "schema_version": "1.0.0",
+  "id": "invalid.missing_colon.001",
+  "category": "invalid",
+  "description": "Pair is missing colon separator after key.",
+  "input": "name \"Alice\"",
+  "expect": {
+    "status": "error",
+    "error": {
+      "code": "CCML1004",
+      "line": 1,
+      "column": 6,
+      "message_contains": "colon"
+    }
+  }
+}

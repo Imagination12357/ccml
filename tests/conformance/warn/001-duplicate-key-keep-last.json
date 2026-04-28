@@ -1,0 +1,18 @@
+{
+  "schema_version": "1.0.0",
+  "id": "warn.duplicate_key_keep_last.001",
+  "category": "warn",
+  "description": "Duplicate key should keep last value and emit warning.",
+  "input": "x: 1\nx: 2",
+  "expect": {
+    "status": "ok_with_warnings",
+    "output_json": "{\"x\":2}",
+    "warnings": [
+      {
+        "code": "CCML2001",
+        "severity": "warning",
+        "message_contains": "duplicate key"
+      }
+    ]
+  }
+}

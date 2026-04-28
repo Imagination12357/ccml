@@ -58,6 +58,4 @@ Adopt `Single Core + Bindings` with Rust as the core language.
 - Conformance tests are shared assets and mandatory for release.
 
 ## Follow-up Decisions
-- Duplicate key policy (`keep-last` vs `error`)
-- Bare key character policy (strict vs permissive)
 - CLI default output mode (`pretty` vs `compact`)
