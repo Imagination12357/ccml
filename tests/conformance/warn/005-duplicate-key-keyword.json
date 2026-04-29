@@ -1,0 +1,18 @@
+﻿{
+    "schema_version":  "1.0.0",
+    "id":  "warn.duplicate.keyword_key.005",
+    "category":  "warn",
+    "description":  "Keyword-like duplicate key warns.",
+    "input":  "true: 1\ntrue: 2",
+    "expect":  {
+                   "status":  "ok_with_warnings",
+                   "output_json":  "{\"true\":2}",
+                   "warnings":  [
+                                    {
+                                        "code":  "CCML2001",
+                                        "severity":  "warning",
+                                        "message_contains":  "duplicate key"
+                                    }
+                                ]
+               }
+}

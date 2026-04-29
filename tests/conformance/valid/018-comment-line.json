@@ -1,0 +1,11 @@
+﻿{
+    "schema_version":  "1.0.0",
+    "id":  "valid.comment.line.018",
+    "category":  "valid",
+    "description":  "Line comment is ignored.",
+    "input":  "# c\na: 1",
+    "expect":  {
+                   "status":  "ok",
+                   "output_json":  "{\"a\":1}"
+               }
+}

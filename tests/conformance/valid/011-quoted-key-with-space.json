@@ -1,0 +1,11 @@
+﻿{
+    "schema_version":  "1.0.0",
+    "id":  "valid.quoted_key.space.011",
+    "category":  "valid",
+    "description":  "Quoted key with spaces.",
+    "input":  "\"user name\": \"alice\"",
+    "expect":  {
+                   "status":  "ok",
+                   "output_json":  "{\"user name\":\"alice\"}"
+               }
+}

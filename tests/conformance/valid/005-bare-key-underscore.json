@@ -1,0 +1,11 @@
+﻿{
+    "schema_version":  "1.0.0",
+    "id":  "valid.bare_key.underscore.005",
+    "category":  "valid",
+    "description":  "Underscore-only style bare key.",
+    "input":  "_k: null",
+    "expect":  {
+                   "status":  "ok",
+                   "output_json":  "{\"_k\":null}"
+               }
+}

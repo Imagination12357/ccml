@@ -1,0 +1,11 @@
+﻿{
+    "schema_version":  "1.0.0",
+    "id":  "valid.keyword_key.true.008",
+    "category":  "valid",
+    "description":  "Keyword-like key true is treated as string key.",
+    "input":  "true: 1",
+    "expect":  {
+                   "status":  "ok",
+                   "output_json":  "{\"true\":1}"
+               }
+}

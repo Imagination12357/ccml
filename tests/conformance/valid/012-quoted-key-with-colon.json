@@ -1,0 +1,11 @@
+﻿{
+    "schema_version":  "1.0.0",
+    "id":  "valid.quoted_key.colon.012",
+    "category":  "valid",
+    "description":  "Quoted key with colon.",
+    "input":  "\"a:b\": 2",
+    "expect":  {
+                   "status":  "ok",
+                   "output_json":  "{\"a:b\":2}"
+               }
+}

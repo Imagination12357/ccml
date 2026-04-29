@@ -1,0 +1,11 @@
+﻿{
+    "schema_version":  "1.0.0",
+    "id":  "valid.keyword_key.null.009",
+    "category":  "valid",
+    "description":  "Keyword-like key null is treated as string key.",
+    "input":  "null: 0",
+    "expect":  {
+                   "status":  "ok",
+                   "output_json":  "{\"null\":0}"
+               }
+}

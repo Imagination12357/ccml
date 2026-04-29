@@ -1,0 +1,16 @@
+﻿{
+    "schema_version":  "1.0.0",
+    "id":  "invalid.trailing_token.007",
+    "category":  "invalid",
+    "description":  "Unexpected trailing token after value.",
+    "input":  "a: 1 }",
+    "expect":  {
+                   "status":  "error",
+                   "error":  {
+                                 "code":  "CCML1001",
+                                 "line":  1,
+                                 "column":  6,
+                                 "message_contains":  "token"
+                             }
+               }
+}

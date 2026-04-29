@@ -1,0 +1,11 @@
+﻿{
+    "schema_version":  "1.0.0",
+    "id":  "valid.number.negative.023",
+    "category":  "valid",
+    "description":  "Negative number literal.",
+    "input":  "n: -1.5",
+    "expect":  {
+                   "status":  "ok",
+                   "output_json":  "{\"n\":-1.5}"
+               }
+}

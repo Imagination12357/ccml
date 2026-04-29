@@ -1,0 +1,11 @@
+﻿{
+    "schema_version":  "1.0.0",
+    "id":  "valid.array.mixed_separator.015",
+    "category":  "valid",
+    "description":  "Array values separated by mixed comma and whitespace.",
+    "input":  "[1, 2 3,4]",
+    "expect":  {
+                   "status":  "ok",
+                   "output_json":  "[1,2,3,4]"
+               }
+}

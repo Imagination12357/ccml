@@ -1,0 +1,11 @@
+﻿{
+    "schema_version":  "1.0.0",
+    "id":  "valid.numeric_key.010",
+    "category":  "valid",
+    "description":  "Numeric-looking key is treated as string key.",
+    "input":  "10: \"x\"",
+    "expect":  {
+                   "status":  "ok",
+                   "output_json":  "{\"10\":\"x\"}"
+               }
+}

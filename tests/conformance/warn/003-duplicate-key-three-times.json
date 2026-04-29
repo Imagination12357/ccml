@@ -1,0 +1,18 @@
+﻿{
+    "schema_version":  "1.0.0",
+    "id":  "warn.duplicate.three_times.003",
+    "category":  "warn",
+    "description":  "Three duplicates keep final value.",
+    "input":  "a: 1\na: 2\na: 3",
+    "expect":  {
+                   "status":  "ok_with_warnings",
+                   "output_json":  "{\"a\":3}",
+                   "warnings":  [
+                                    {
+                                        "code":  "CCML2001",
+                                        "severity":  "warning",
+                                        "message_contains":  "duplicate key"
+                                    }
+                                ]
+               }
+}

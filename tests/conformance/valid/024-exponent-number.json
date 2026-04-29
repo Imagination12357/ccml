@@ -1,0 +1,11 @@
+﻿{
+    "schema_version":  "1.0.0",
+    "id":  "valid.number.exponent.024",
+    "category":  "valid",
+    "description":  "Exponent number literal.",
+    "input":  "n: 1e10",
+    "expect":  {
+                   "status":  "ok",
+                   "output_json":  "{\"n\":10000000000}"
+               }
+}

@@ -1,0 +1,11 @@
+﻿{
+    "schema_version":  "1.0.0",
+    "id":  "valid.string.escape.025",
+    "category":  "valid",
+    "description":  "Escaped quote in string.",
+    "input":  "s: \"a\\\"b\"",
+    "expect":  {
+                   "status":  "ok",
+                   "output_json":  "{\"s\":\"a\\\"b\"}"
+               }
+}

@@ -1,0 +1,18 @@
+﻿{
+    "schema_version":  "1.0.0",
+    "id":  "warn.duplicate.quoted_bare_equiv.007",
+    "category":  "warn",
+    "description":  "Bare and quoted equivalent keys are duplicates.",
+    "input":  "a: 1\n\"a\": 2",
+    "expect":  {
+                   "status":  "ok_with_warnings",
+                   "output_json":  "{\"a\":2}",
+                   "warnings":  [
+                                    {
+                                        "code":  "CCML2001",
+                                        "severity":  "warning",
+                                        "message_contains":  "duplicate key"
+                                    }
+                                ]
+               }
+}

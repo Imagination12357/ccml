@@ -1,0 +1,11 @@
+﻿{
+    "schema_version":  "1.0.0",
+    "id":  "valid.bare_key.leading_minus_mixed.004",
+    "category":  "valid",
+    "description":  "Bare key can start with minus when not punctuation-only.",
+    "input":  "-name: true",
+    "expect":  {
+                   "status":  "ok",
+                   "output_json":  "{\"-name\":true}"
+               }
+}

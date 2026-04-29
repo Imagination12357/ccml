@@ -1,0 +1,16 @@
+﻿{
+    "schema_version":  "1.0.0",
+    "id":  "invalid.number.leading_zero.009",
+    "category":  "invalid",
+    "description":  "Invalid number with leading zero.",
+    "input":  "a: 01",
+    "expect":  {
+                   "status":  "error",
+                   "error":  {
+                                 "code":  "CCML1003",
+                                 "line":  1,
+                                 "column":  4,
+                                 "message_contains":  "number"
+                             }
+               }
+}

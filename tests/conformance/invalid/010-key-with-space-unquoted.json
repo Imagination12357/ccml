@@ -1,0 +1,16 @@
+﻿{
+    "schema_version":  "1.0.0",
+    "id":  "invalid.key.space_unquoted.010",
+    "category":  "invalid",
+    "description":  "Unquoted key cannot contain spaces.",
+    "input":  "user name: 1",
+    "expect":  {
+                   "status":  "error",
+                   "error":  {
+                                 "code":  "CCML1004",
+                                 "line":  1,
+                                 "column":  6,
+                                 "message_contains":  "colon"
+                             }
+               }
+}

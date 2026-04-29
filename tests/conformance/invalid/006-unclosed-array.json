@@ -1,0 +1,16 @@
+﻿{
+    "schema_version":  "1.0.0",
+    "id":  "invalid.array.unclosed.006",
+    "category":  "invalid",
+    "description":  "Unclosed array delimiter.",
+    "input":  "[1 2",
+    "expect":  {
+                   "status":  "error",
+                   "error":  {
+                                 "code":  "CCML1005",
+                                 "line":  1,
+                                 "column":  5,
+                                 "message_contains":  "delimiter"
+                             }
+               }
+}

@@ -1,0 +1,16 @@
+﻿{
+    "schema_version":  "1.0.0",
+    "id":  "invalid.comment_pair_missing.011",
+    "category":  "invalid",
+    "description":  "Comment then malformed pair.",
+    "input":  "# x\na 1",
+    "expect":  {
+                   "status":  "error",
+                   "error":  {
+                                 "code":  "CCML1004",
+                                 "line":  2,
+                                 "column":  3,
+                                 "message_contains":  "colon"
+                             }
+               }
+}

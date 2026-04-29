@@ -1,0 +1,11 @@
+﻿{
+    "schema_version":  "1.0.0",
+    "id":  "valid.bare_key.dot_chain.006",
+    "category":  "valid",
+    "description":  "Dot-chain bare key accepted.",
+    "input":  "service.api.v1: \"ok\"",
+    "expect":  {
+                   "status":  "ok",
+                   "output_json":  "{\"service.api.v1\":\"ok\"}"
+               }
+}

@@ -1,0 +1,11 @@
+﻿{
+    "schema_version":  "1.0.0",
+    "id":  "valid.root.array_object.026",
+    "category":  "valid",
+    "description":  "Root array containing object.",
+    "input":  "[{a:1} {b:2}]",
+    "expect":  {
+                   "status":  "ok",
+                   "output_json":  "[{\"a\":1},{\"b\":2}]"
+               }
+}

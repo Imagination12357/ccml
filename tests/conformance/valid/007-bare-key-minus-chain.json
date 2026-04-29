@@ -1,0 +1,11 @@
+﻿{
+    "schema_version":  "1.0.0",
+    "id":  "valid.bare_key.minus_chain.007",
+    "category":  "valid",
+    "description":  "Dash-chain bare key accepted.",
+    "input":  "feature-flag-1: false",
+    "expect":  {
+                   "status":  "ok",
+                   "output_json":  "{\"feature-flag-1\":false}"
+               }
+}

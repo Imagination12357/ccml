@@ -1,0 +1,11 @@
+﻿{
+    "schema_version":  "1.0.0",
+    "id":  "valid.root.implicit_multi_line.016",
+    "category":  "valid",
+    "description":  "Implicit root object across lines.",
+    "input":  "a: 1\nb: 2\nc: 3",
+    "expect":  {
+                   "status":  "ok",
+                   "output_json":  "{\"a\":1,\"b\":2,\"c\":3}"
+               }
+}

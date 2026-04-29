@@ -1,0 +1,18 @@
+﻿{
+    "schema_version":  "1.0.0",
+    "id":  "warn.duplicate.numeric_key.006",
+    "category":  "warn",
+    "description":  "Numeric-looking duplicate key warns.",
+    "input":  "10: \"a\"\n10: \"b\"",
+    "expect":  {
+                   "status":  "ok_with_warnings",
+                   "output_json":  "{\"10\":\"b\"}",
+                   "warnings":  [
+                                    {
+                                        "code":  "CCML2001",
+                                        "severity":  "warning",
+                                        "message_contains":  "duplicate key"
+                                    }
+                                ]
+               }
+}

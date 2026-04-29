@@ -1,0 +1,11 @@
+﻿{
+    "schema_version":  "1.0.0",
+    "id":  "valid.comment.inline.019",
+    "category":  "valid",
+    "description":  "Inline comment is ignored.",
+    "input":  "a: 1 # note",
+    "expect":  {
+                   "status":  "ok",
+                   "output_json":  "{\"a\":1}"
+               }
+}

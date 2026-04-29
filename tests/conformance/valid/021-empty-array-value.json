@@ -1,0 +1,11 @@
+﻿{
+    "schema_version":  "1.0.0",
+    "id":  "valid.array.empty.021",
+    "category":  "valid",
+    "description":  "Empty array value.",
+    "input":  "items: []",
+    "expect":  {
+                   "status":  "ok",
+                   "output_json":  "{\"items\":[]}"
+               }
+}

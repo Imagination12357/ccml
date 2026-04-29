@@ -1,0 +1,18 @@
+﻿{
+    "schema_version":  "1.0.0",
+    "id":  "warn.duplicate.comment_between.009",
+    "category":  "warn",
+    "description":  "Duplicate separated by comment warns.",
+    "input":  "a: 1\n# note\na: 2",
+    "expect":  {
+                   "status":  "ok_with_warnings",
+                   "output_json":  "{\"a\":2}",
+                   "warnings":  [
+                                    {
+                                        "code":  "CCML2001",
+                                        "severity":  "warning",
+                                        "message_contains":  "duplicate key"
+                                    }
+                                ]
+               }
+}

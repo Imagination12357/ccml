@@ -1,0 +1,11 @@
+﻿{
+    "schema_version":  "1.0.0",
+    "id":  "valid.root.explicit_object.017",
+    "category":  "valid",
+    "description":  "Explicit object root.",
+    "input":  "{ a: 1 b: 2 }",
+    "expect":  {
+                   "status":  "ok",
+                   "output_json":  "{\"a\":1,\"b\":2}"
+               }
+}

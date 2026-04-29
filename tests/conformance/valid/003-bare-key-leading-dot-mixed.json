@@ -1,0 +1,11 @@
+﻿{
+    "schema_version":  "1.0.0",
+    "id":  "valid.bare_key.leading_dot_mixed.003",
+    "category":  "valid",
+    "description":  "Bare key can start with dot when not punctuation-only.",
+    "input":  ".env: \"prod\"",
+    "expect":  {
+                   "status":  "ok",
+                   "output_json":  "{\".env\":\"prod\"}"
+               }
+}

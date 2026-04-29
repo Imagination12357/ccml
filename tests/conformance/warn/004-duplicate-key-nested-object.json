@@ -1,0 +1,18 @@
+﻿{
+    "schema_version":  "1.0.0",
+    "id":  "warn.duplicate.nested_object.004",
+    "category":  "warn",
+    "description":  "Duplicate key inside nested object warns.",
+    "input":  "x: { a: 1 a: 2 }",
+    "expect":  {
+                   "status":  "ok_with_warnings",
+                   "output_json":  "{\"x\":{\"a\":2}}",
+                   "warnings":  [
+                                    {
+                                        "code":  "CCML2001",
+                                        "severity":  "warning",
+                                        "message_contains":  "duplicate key"
+                                    }
+                                ]
+               }
+}

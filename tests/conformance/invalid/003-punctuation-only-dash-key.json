@@ -1,0 +1,16 @@
+﻿{
+    "schema_version":  "1.0.0",
+    "id":  "invalid.key.punct_only_dash.003",
+    "category":  "invalid",
+    "description":  "Dash-only bare key is disallowed.",
+    "input":  "--: 1",
+    "expect":  {
+                   "status":  "error",
+                   "error":  {
+                                 "code":  "CCML1006",
+                                 "line":  1,
+                                 "column":  1,
+                                 "message_contains":  "key"
+                             }
+               }
+}

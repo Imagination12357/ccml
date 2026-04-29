@@ -1,0 +1,11 @@
+﻿{
+    "schema_version":  "1.0.0",
+    "id":  "valid.array.comma_separator.014",
+    "category":  "valid",
+    "description":  "Array values separated by commas.",
+    "input":  "[1,2,3]",
+    "expect":  {
+                   "status":  "ok",
+                   "output_json":  "[1,2,3]"
+               }
+}

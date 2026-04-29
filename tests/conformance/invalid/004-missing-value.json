@@ -1,0 +1,16 @@
+﻿{
+    "schema_version":  "1.0.0",
+    "id":  "invalid.pair.missing_value.004",
+    "category":  "invalid",
+    "description":  "Missing value after colon.",
+    "input":  "a:",
+    "expect":  {
+                   "status":  "error",
+                   "error":  {
+                                 "code":  "CCML1001",
+                                 "line":  1,
+                                 "column":  3,
+                                 "message_contains":  "value"
+                             }
+               }
+}

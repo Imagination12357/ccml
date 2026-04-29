@@ -1,0 +1,11 @@
+﻿{
+    "schema_version":  "1.0.0",
+    "id":  "valid.nested.object_array.020",
+    "category":  "valid",
+    "description":  "Nested object with array.",
+    "input":  "server: { host: \"localhost\" ports: [80 443] }",
+    "expect":  {
+                   "status":  "ok",
+                   "output_json":  "{\"server\":{\"host\":\"localhost\",\"ports\":[80,443]}}"
+               }
+}

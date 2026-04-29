@@ -1,0 +1,11 @@
+﻿{
+    "schema_version":  "1.0.0",
+    "id":  "valid.bare_key.leading_digit.002",
+    "category":  "valid",
+    "description":  "Bare key can start with digit.",
+    "input":  "123abc: 1",
+    "expect":  {
+                   "status":  "ok",
+                   "output_json":  "{\"123abc\":1}"
+               }
+}

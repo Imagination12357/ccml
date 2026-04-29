@@ -1,0 +1,11 @@
+﻿{
+    "schema_version":  "1.0.0",
+    "id":  "valid.object.empty.022",
+    "category":  "valid",
+    "description":  "Explicit empty object.",
+    "input":  "{}",
+    "expect":  {
+                   "status":  "ok",
+                   "output_json":  "{}"
+               }
+}
