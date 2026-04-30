@@ -97,3 +97,32 @@
 1. Correctness and compatibility with spec
 2. Diagnostic clarity
 3. Performance tuning (after correctness gate)
+
+## 7. Execution Log
+### Day 3 - Thu 2026-04-30 (Micro Loop 1)
+- Plan:
+  - Implement parser skeleton for core value/object/array flow with implicit root support.
+- Design:
+  - Split core into `ast.rs`, `diag.rs`, `parser.rs`, `json.rs`.
+- Implement:
+  - Added recursive-descent parser skeleton and JSON serializer path.
+  - Wired public API: `parse`, `to_json`, `diagnose`.
+- Validate:
+  - `cargo test --offline -p ccml-core` passed (2/2 tests).
+- Document:
+  - Architecture and weekly plan kept in sync with implementation status.
+
+### Day 3 - Thu 2026-04-30 (Micro Loop 2)
+- Plan:
+  - Add unicode escape parsing, tighten EOF/separator diagnostics, and expand conformance-linked unit tests.
+- Design:
+  - Keep parser contract stable and extend only parser internals (`parser.rs`) plus API-level tests (`lib.rs`).
+- Implement:
+  - Added `\\uXXXX` escape handling.
+  - Added explicit missing-value error after `key:`.
+  - Kept bare-key punctuation-only rejection in parser path.
+  - Added unit tests for unicode escape, missing value, invalid bare key, and keyword-like key handling.
+- Validate:
+  - `cargo test --offline -p ccml-core` passed (6/6 tests).
+- Document:
+  - Day 3 loop-2 status recorded for traceability.
