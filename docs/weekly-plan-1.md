@@ -126,3 +126,17 @@
   - `cargo test --offline -p ccml-core` passed (6/6 tests).
 - Document:
   - Day 3 loop-2 status recorded for traceability.
+
+### Day 4 - Fri 2026-05-01
+- Plan:
+  - Implement diagnostics baseline and duplicate-key policy behavior.
+- Design:
+  - Keep parse API stable while adding internal diagnostics collection in parser.
+- Implement:
+  - Added parser-level diagnostics accumulator.
+  - Implemented duplicate-key warning emission (`CCML2001`) with keep-last overwrite.
+  - Updated `diagnose()` to return warnings even when parse succeeds.
+- Validate:
+  - `cargo test --offline -p ccml-core` passed (7/7 tests).
+- Document:
+  - Day 4 execution status recorded.

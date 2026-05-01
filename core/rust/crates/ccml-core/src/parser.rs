@@ -1,13 +1,14 @@
 use std::collections::BTreeMap;
 
 use crate::ast::AstNode;
-use crate::diag::CcmlError;
+use crate::diag::{CcmlError, Diagnostic, Severity};
 
 pub struct Parser<'a> {
     src: &'a str,
     idx: usize,
     line: usize,
     col: usize,
+    diagnostics: Vec<Diagnostic>,
 }
 
 impl<'a> Parser<'a> {
@@ -17,19 +18,46 @@ impl<'a> Parser<'a> {
             idx: 0,
             line: 1,
             col: 1,
+            diagnostics: Vec::new(),
         }
     }
 
-    pub fn parse_start(mut self) -> Result<AstNode, CcmlError> {
+    pub fn parse_start(self) -> Result<AstNode, CcmlError> {
+        self.parse_start_with_diagnostics().map(|(ast, _)| ast)
+    }
+
+    pub fn parse_start_with_diagnostics(mut self) -> Result<(AstNode, Vec<Diagnostic>), CcmlError> {
         self.skip_ws_and_comments();
-        if self.eof() {
-            return Ok(AstNode::Object(BTreeMap::new()));
-        }
-        match self.peek() {
+        let ast = if self.eof() {
+            AstNode::Object(BTreeMap::new())
+        } else {
+            match self.peek() {
             Some('{') => self.parse_object(),
             Some('[') => self.parse_array(),
             _ => self.parse_implicit_root_object(),
+            }?
+        };
+        Ok((ast, self.diagnostics))
+    }
+
+    fn insert_object_entry(
+        &mut self,
+        map: &mut BTreeMap<String, AstNode>,
+        key: String,
+        key_line: usize,
+        key_col: usize,
+        value: AstNode,
+    ) {
+        if map.contains_key(&key) {
+            self.diagnostics.push(Diagnostic {
+                code: "CCML2001".to_string(),
+                message: format!("duplicate key '{}' overwritten by keep-last policy", key),
+                line: key_line,
+                column: key_col,
+                severity: Severity::Warning,
+            });
         }
+        map.insert(key, value);
     }
 
     fn parse_implicit_root_object(&mut self) -> Result<AstNode, CcmlError> {
@@ -47,7 +75,7 @@ impl<'a> Parser<'a> {
                 return Err(self.err("CCML1001", "missing value"));
             }
             let value = self.parse_value()?;
-            map.insert(key, value);
+            self.insert_object_entry(&mut map, key.value, key.line, key.column, value);
             self.skip_separators();
         }
         Ok(AstNode::Object(map))
@@ -96,7 +124,7 @@ impl<'a> Parser<'a> {
                 return Err(self.err("CCML1001", "missing value"));
             }
             let value = self.parse_value()?;
-            map.insert(key, value);
+            self.insert_object_entry(&mut map, key.value, key.line, key.column, value);
             self.skip_separators();
         }
         Ok(AstNode::Object(map))
@@ -119,11 +147,21 @@ impl<'a> Parser<'a> {
         Ok(AstNode::Array(out))
     }
 
-    fn parse_key(&mut self) -> Result<String, CcmlError> {
+    fn parse_key(&mut self) -> Result<ParsedKey, CcmlError> {
         self.skip_ws_and_comments();
+        let line = self.line;
+        let column = self.col;
         match self.peek() {
-            Some('"') => self.parse_string(),
-            Some(_) => self.parse_bare_key(),
+            Some('"') => Ok(ParsedKey {
+                value: self.parse_string()?,
+                line,
+                column,
+            }),
+            Some(_) => Ok(ParsedKey {
+                value: self.parse_bare_key()?,
+                line,
+                column,
+            }),
             None => Err(self.err("CCML1006", "invalid key token")),
         }
     }
@@ -343,4 +381,10 @@ impl<'a> Parser<'a> {
 
 fn is_bare_key_char(ch: char) -> bool {
     ch.is_ascii_alphanumeric() || ch == '_' || ch == '.' || ch == '-'
+}
+
+struct ParsedKey {
+    value: String,
+    line: usize,
+    column: usize,
 }
