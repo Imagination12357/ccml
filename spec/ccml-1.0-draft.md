@@ -70,6 +70,9 @@ Draft error code set:
 - `CCML1005` Mismatched closing delimiter
 - `CCML1006` Invalid key token
 
+Warning code set:
+- `CCML2001` Duplicate key overwritten by keep-last policy
+
 ## 8. Conformance Requirements
 - A conforming parser MUST accept all valid cases in `tests/conformance/valid`.
 - A conforming parser MUST reject invalid cases in `tests/conformance/invalid` with positional diagnostics.
