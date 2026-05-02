@@ -317,7 +317,7 @@ impl<'a> Parser<'a> {
         loop {
             let before = self.idx;
             while let Some(ch) = self.peek() {
-                if ch.is_whitespace() {
+                if ch.is_whitespace() || ch == '\u{feff}' {
                     self.bump();
                 } else {
                     break;

@@ -140,3 +140,19 @@
   - `cargo test --offline -p ccml-core` passed (7/7 tests).
 - Document:
   - Day 4 execution status recorded.
+
+### Day 5 - Sat 2026-05-02
+- Plan:
+  - Build Rust conformance runner prototype using shared vector files.
+- Design:
+  - Add a `conformance` mode to `ccml-cli` so vectors can be run without extra external dependencies.
+- Implement:
+  - Added `ccml-cli conformance [path]` mode.
+  - Runner reads all `valid/invalid/warn` vector files and validates status/output/warnings/errors.
+  - Added semantic numeric equality in JSON comparison (e.g. `1e10` == `10000000000`).
+  - Added BOM-tolerant whitespace handling in parser for UTF-8 BOM vector files.
+- Validate:
+  - `cargo run --offline -p ccml-cli -- conformance ../../tests/conformance`
+  - Result: `total=46`, `failed=5`.
+- Document:
+  - Remaining failures are now explicit and traceable for parser-diagnostic refinement.
