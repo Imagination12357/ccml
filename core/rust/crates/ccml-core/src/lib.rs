@@ -1,10 +1,12 @@
 mod ast;
 mod diag;
 mod json;
+mod native;
 mod parser;
 
 pub use ast::AstNode;
 pub use diag::{CcmlError, Diagnostic, Severity};
+pub use native::{ast_to_native, NativeNumber, NativeValue};
 use json::to_json_string;
 use parser::Parser;
 
@@ -30,6 +32,11 @@ fn parse_with_diagnostics(text: &str) -> Result<(AstNode, Vec<Diagnostic>), Ccml
 pub fn to_json(text: &str, options: &ToJsonOptions) -> Result<String, CcmlError> {
     let ast = parse(text)?;
     Ok(to_json_string(&ast, options.pretty))
+}
+
+pub fn to_native(text: &str) -> Result<NativeValue, CcmlError> {
+    let ast = parse(text)?;
+    Ok(ast_to_native(&ast))
 }
 
 pub fn diagnose(text: &str) -> Vec<Diagnostic> {
@@ -103,5 +110,28 @@ mod tests {
         let src = "s: \"\\b\\f\\n\\r\\t\\\\\\\"\"";
         let json = to_json(src, &ToJsonOptions { pretty: false }).unwrap();
         assert_eq!(json, "{\"s\":\"\\b\\f\\n\\r\\t\\\\\\\"\"}");
+    }
+
+    #[test]
+    fn preserves_number_raw_in_json_mode() {
+        let src = "n: 1e10";
+        let json = to_json(src, &ToJsonOptions { pretty: false }).unwrap();
+        assert_eq!(json, "{\"n\":1e10}");
+    }
+
+    #[test]
+    fn exposes_number_raw_in_native_mode() {
+        let src = "n: 1e10";
+        let native = to_native(src).unwrap();
+        let obj = match native {
+            NativeValue::Object(o) => o,
+            _ => panic!("expected object"),
+        };
+        let n = match obj.get("n").unwrap() {
+            NativeValue::Number(v) => v,
+            _ => panic!("expected number"),
+        };
+        assert_eq!(n.raw, "1e10");
+        assert_eq!(n.as_f64(), Some(1e10_f64));
     }
 }

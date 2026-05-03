@@ -156,3 +156,22 @@
   - Result: `total=46`, `failed=5`.
 - Document:
   - Remaining failures are now explicit and traceable for parser-diagnostic refinement.
+
+### Day 6 - Sun 2026-05-03
+- Plan:
+  - Resolve parser diagnostic precision gaps and JSON transcode distortion risks first, then establish IR-to-native path with number raw preservation.
+- Design:
+  - Keep `parse -> IR(AST)` as source of truth.
+  - Add explicit `IR -> NativeValue` conversion path.
+  - Keep `IR -> JSON` path raw-preserving for number lexemes.
+- Implement:
+  - Improved parser diagnostic positioning and unexpected-token classification for trailing token scenarios.
+  - Extended JSON string escaping for `\\b`, `\\f`, and all remaining control characters (`U+0000..U+001F`).
+  - Added `native.rs` and `to_native()` API for explicit IR-to-native conversion.
+  - Added native number type preserving raw lexeme with helper conversion methods.
+  - Updated spec with number preservation policy for transcode/native modes.
+- Validate:
+  - `cargo test --offline -p ccml-core` passed (10/10 tests).
+  - `cargo run --offline -p ccml-cli -- conformance ../../tests/conformance` -> `total=46`, `failed=0`.
+- Document:
+  - Day 6 execution status recorded with mode-policy alignment complete.

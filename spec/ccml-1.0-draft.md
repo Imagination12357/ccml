@@ -79,6 +79,10 @@ Warning code set:
 - A conforming transcoder MUST produce valid JSON text for all valid CCML inputs.
 - Test vector file format MUST follow `tests/conformance/_schema/ccml-conformance-case.schema.json`.
 
+### 8.1 Number Preservation Policy
+- JSON transcode mode MUST preserve numeric raw lexeme text from source where valid (for example, `1e10` remains `1e10`).
+- Native-object mode MAY expose parsed numeric helpers, but MUST preserve the original raw numeric lexeme alongside any derived numeric representation.
+
 ## 9. Non-Goals for 1.0
 - include/import directives
 - schema/type extension system
