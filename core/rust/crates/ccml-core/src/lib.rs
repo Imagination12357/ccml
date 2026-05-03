@@ -97,4 +97,11 @@ mod tests {
         assert_eq!(diagnostics[0].code, "CCML2001");
         assert_eq!(diagnostics[0].severity, Severity::Warning);
     }
+
+    #[test]
+    fn json_escape_preserves_control_sequences() {
+        let src = "s: \"\\b\\f\\n\\r\\t\\\\\\\"\"";
+        let json = to_json(src, &ToJsonOptions { pretty: false }).unwrap();
+        assert_eq!(json, "{\"s\":\"\\b\\f\\n\\r\\t\\\\\\\"\"}");
+    }
 }

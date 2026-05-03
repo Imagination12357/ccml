@@ -69,9 +69,16 @@ fn escape(s: &str) -> String {
         match ch {
             '\\' => out.push_str("\\\\"),
             '"' => out.push_str("\\\""),
+            '\u{0008}' => out.push_str("\\b"),
+            '\u{000C}' => out.push_str("\\f"),
             '\n' => out.push_str("\\n"),
             '\r' => out.push_str("\\r"),
             '\t' => out.push_str("\\t"),
+            c if c <= '\u{001F}' => {
+                let code = c as u32;
+                out.push_str("\\u");
+                out.push_str(&format!("{code:04x}"));
+            }
             _ => out.push(ch),
         }
     }
