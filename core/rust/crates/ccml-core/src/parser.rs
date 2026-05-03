@@ -67,6 +67,9 @@ impl<'a> Parser<'a> {
             if self.eof() {
                 break;
             }
+            if matches!(self.peek(), Some('}' | ']')) {
+                return Err(self.err("CCML1001", "unexpected token"));
+            }
             let key = self.parse_key()?;
             self.skip_ws_and_comments();
             self.expect(':', "CCML1004", "missing colon in pair")?;
@@ -167,6 +170,8 @@ impl<'a> Parser<'a> {
     }
 
     fn parse_bare_key(&mut self) -> Result<String, CcmlError> {
+        let start_line = self.line;
+        let start_col = self.col;
         let start = self.idx;
         while let Some(ch) = self.peek() {
             if is_bare_key_char(ch) {
@@ -180,12 +185,14 @@ impl<'a> Parser<'a> {
         }
         let key = &self.src[start..self.idx];
         if key.chars().all(|c| c == '.' || c == '-') {
-            return Err(self.err("CCML1006", "invalid key token"));
+            return Err(self.err_at("CCML1006", "invalid key token", start_line, start_col));
         }
         Ok(key.to_string())
     }
 
     fn parse_string(&mut self) -> Result<String, CcmlError> {
+        let start_line = self.line;
+        let start_col = self.col;
         self.expect('"', "CCML1002", "unterminated string")?;
         let mut out = String::new();
         while let Some(ch) = self.peek() {
@@ -196,9 +203,9 @@ impl<'a> Parser<'a> {
                 }
                 '\\' => {
                     self.bump();
-                    let esc = self
-                        .peek()
-                        .ok_or_else(|| self.err("CCML1002", "unterminated string"))?;
+                    let esc = self.peek().ok_or_else(|| {
+                        self.err_at("CCML1002", "unterminated string", start_line, start_col)
+                    })?;
                     self.bump();
                     match esc {
                         '"' => out.push('"'),
@@ -214,10 +221,22 @@ impl<'a> Parser<'a> {
                             if let Some(ch) = char::from_u32(code) {
                                 out.push(ch);
                             } else {
-                                return Err(self.err("CCML1002", "invalid unicode escape"));
+                                return Err(self.err_at(
+                                    "CCML1002",
+                                    "invalid unicode escape",
+                                    start_line,
+                                    start_col,
+                                ));
                             }
                         }
-                        _ => return Err(self.err("CCML1002", "invalid string escape")),
+                        _ => {
+                            return Err(self.err_at(
+                                "CCML1002",
+                                "invalid string escape",
+                                start_line,
+                                start_col,
+                            ))
+                        }
                     }
                 }
                 _ => {
@@ -226,7 +245,7 @@ impl<'a> Parser<'a> {
                 }
             }
         }
-        Err(self.err("CCML1002", "unterminated string"))
+        Err(self.err_at("CCML1002", "unterminated string", start_line, start_col))
     }
 
     fn parse_u4_hex(&mut self) -> Result<u32, CcmlError> {
@@ -245,6 +264,8 @@ impl<'a> Parser<'a> {
     }
 
     fn parse_number(&mut self) -> Result<String, CcmlError> {
+        let start_line = self.line;
+        let start_col = self.col;
         let start = self.idx;
         if self.match_char('-') {}
 
@@ -252,7 +273,7 @@ impl<'a> Parser<'a> {
             Some('0') => {
                 self.bump();
                 if matches!(self.peek(), Some('0'..='9')) {
-                    return Err(self.err("CCML1003", "invalid number format"));
+                    return Err(self.err_at("CCML1003", "invalid number format", start_line, start_col));
                 }
             }
             Some('1'..='9') => {
@@ -261,12 +282,12 @@ impl<'a> Parser<'a> {
                     self.bump();
                 }
             }
-            _ => return Err(self.err("CCML1003", "invalid number format")),
+            _ => return Err(self.err_at("CCML1003", "invalid number format", start_line, start_col)),
         }
 
         if self.match_char('.') {
             if !matches!(self.peek(), Some('0'..='9')) {
-                return Err(self.err("CCML1003", "invalid number format"));
+                return Err(self.err_at("CCML1003", "invalid number format", start_line, start_col));
             }
             while matches!(self.peek(), Some('0'..='9')) {
                 self.bump();
@@ -279,7 +300,7 @@ impl<'a> Parser<'a> {
                 self.bump();
             }
             if !matches!(self.peek(), Some('0'..='9')) {
-                return Err(self.err("CCML1003", "invalid number format"));
+                return Err(self.err_at("CCML1003", "invalid number format", start_line, start_col));
             }
             while matches!(self.peek(), Some('0'..='9')) {
                 self.bump();
@@ -376,6 +397,10 @@ impl<'a> Parser<'a> {
 
     fn err(&self, code: &str, message: &str) -> CcmlError {
         CcmlError::single(code, message, self.line, self.col)
+    }
+
+    fn err_at(&self, code: &str, message: &str, line: usize, col: usize) -> CcmlError {
+        CcmlError::single(code, message, line, col)
     }
 }
 
