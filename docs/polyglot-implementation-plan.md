@@ -75,3 +75,38 @@ Ship CCML 1.0 with one Rust core and multiple language bindings without behavior
 1. Define conformance case file schema
 2. Scaffold Rust workspace (`ccml-core`, `ccml-cli`, `ccml-ffi`, `ccml-wasm`)
 3. Migrate MVP tests into conformance vectors
+
+## 6. Week 2 Implementation Plan (FFI and Binding Kickoff)
+
+### 6.1 Scope
+- Implement `ccml-ffi` phase-1 surface for Python/Node binding kickoff.
+- Keep `ccml-core` as single behavior source of truth.
+- Validate FFI behavior against existing conformance assets.
+
+### 6.2 FFI Contract (Phase 1)
+- ABI style: JSON-only C API (no AST handle API in Week 2).
+- Memory policy: Rust allocates output strings, caller releases via `ccml_free`.
+- Error policy: return code + error JSON out-parameter.
+- Diagnostic payload: JSON array/object with `code`, `message`, `line`, `column`, `severity`.
+
+### 6.3 Planned FFI Functions
+- `ccml_to_json(...)` for transcode path.
+- `ccml_diagnose(...)` for diagnostics path.
+- `ccml_version(...)` for runtime contract/version check.
+- `ccml_free(...)` for buffer release.
+
+### 6.4 Week 2 Validation Targets
+- FFI contract unit tests:
+  - null/invalid argument handling
+  - UTF-8 validation
+  - memory release contract
+- Behavior parity tests:
+  - representative `valid/invalid/warn` vectors through FFI path
+  - duplicate key warning (`CCML2001`) propagation check
+- Smoke adapters:
+  - minimal Python and Node binding calls using identical fixtures
+
+### 6.5 Output Artifacts
+- `ccml-ffi` function-level contract document.
+- binding TODO matrix for Python/Node.
+- Week 2 validation report with pass/fail summary.
