@@ -79,10 +79,9 @@
 - 명세와 구현 불일치
 - 테스트 없는 public behavior 변경
 
-## 6. Milestone Draft (8 weeks)
-1. Week 1-2: Plan/Design freeze
-2. Week 3-4: Core parser + error model
-3. Week 5: CLI + conversion tooling
-4. Week 6: QA hardening
-5. Week 7: RC candidate
-6. Week 8: `v1.0.0` release
+## 6. Milestone Draft (5 weeks)
+1. Week 1 (completed): Plan/Design freeze + core parser baseline + conformance runner prototype.
+2. Week 2: FFI phase-1 implementation + FFI contract tests + Python/Node binding kickoff.
+3. Week 3: Binding stabilization (Python first, Node skeleton) + conformance expansion.
+4. Week 4: QA hardening + CI pipeline integration + RC candidate.
+5. Week 5: Release preparation + `v1.0.0` release.
