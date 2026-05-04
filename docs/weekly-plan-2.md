@@ -1,97 +1,132 @@
 # Weekly Plan 2 (2026-05-05 to 2026-05-11)
 
 ## 1. Weekly Goal
-1. `ccml-ffi` phase-1 C ABI 구현 완료.
-2. FFI 계약 테스트 및 conformance smoke 경로 확보.
-3. Python/Node 바인딩 착수 가능한 경계 확정.
+1. Complete `ccml-ffi` phase-1 C ABI implementation.
+2. Establish FFI contract tests and conformance smoke path.
+3. Start Python/Node binding kickoff with explicit boundary contracts.
+4. Harden conformance runner input path without changing core AST->JSON behavior.
+5. Lock Week 2 interop toolchain decisions (`cbindgen`, `wasm-bindgen`).
 
 ## 2. Scope
 - In scope:
-  - JSON-only FFI surface (`to_json`, `diagnose`, `version`, `free`)
-  - return-code + error-json 계약
-  - alloc/free 메모리 계약
-  - FFI 경유 conformance smoke 검증
-  - Python thin adapter 초안
+  - JSON-only FFI surface (`ccml_to_json`, `ccml_diagnose`, `ccml_version`, `ccml_free`)
+  - return-code + error-json contract
+  - alloc/free ownership contract and null/UTF-8 guards
+  - conformance smoke checks through FFI path
+  - conformance case loading hardening (`serde`/`serde_json` for case loading)
+  - `cbindgen` integration for C header generation from FFI surface
+  - `wasm-bindgen` integration baseline for `ccml-wasm`
 - Out of scope:
-  - Node 완전 바인딩 구현
-  - 배포 자동화 완성
-  - v1.0.0 릴리즈 작업
+  - full Node binding implementation
+  - full release automation completion
+  - v1.0.0 release tasks
+  - any replacement of core parser or core JSON serializer
 
-## 3. Day-by-Day Plan
+## 3. Non-Negotiable Constraints for Week 2
+1. `ccml-core` remains the single semantic source of truth.
+2. `AST -> JSON` output path must stay custom in `ccml-core`; do not use `serde_json` for core output generation.
+3. `serde_json` usage is allowed only for conformance case file loading/validation path.
+4. Every FFI-returned heap buffer must be releasable only via `ccml_free`.
+
+## 4. Day-by-Day Plan
 
 ### Day 1 - Tue 2026-05-05
 - Freeze FFI phase-1 interface:
-  - 함수 시그니처
-  - 리턴코드 표준
-  - 메모리 해제 계약
+  - function signatures
+  - return code set
+  - memory ownership rules
+- Decide error-json envelope fields and versioning policy.
+- Integrate `cbindgen` config and generated header workflow draft.
 - Deliverables:
-  - FFI interface draft 문서
-  - `ccml-ffi` 기본 스켈레톤
+  - FFI interface draft document
+  - `ccml-ffi` function skeleton
 
 ### Day 2 - Wed 2026-05-06
-- Implement `ccml_to_json` + `ccml_diagnose`.
-- Implement argument validation (null/UTF-8).
+- Implement `ccml_to_json` and `ccml_diagnose`.
+- Implement argument validation (null pointer, UTF-8 invalid input).
+- Add panic guard and internal error mapping baseline.
 - Deliverables:
-  - 핵심 FFI 함수 동작
-  - 오류 JSON 반환 경로
+  - working FFI transcode/diagnose path
+  - error-json return path
 
 ### Day 3 - Thu 2026-05-07
-- Implement `ccml_version` + `ccml_free`.
-- Add panic guard and internal error mapping.
+- Implement `ccml_version` and `ccml_free`.
+- Finalize memory ownership contract in code/tests.
+- Set `wasm-bindgen` baseline wiring in `ccml-wasm`.
 - Deliverables:
-  - 메모리 계약 완성
-  - 안전성 경계 처리
+  - complete phase-1 API surface
+  - alloc/free contract enforcement
 
 ### Day 4 - Fri 2026-05-08
 - Add FFI contract tests:
   - success/error/warn path
   - pointer/argument safety
+  - invalid UTF-8 handling
+  - free-after-return behavior
 - Deliverables:
-  - FFI 테스트 세트
-  - 실패 케이스 재현/검증 로그
+  - FFI contract test suite
+  - failure-case verification logs
 
 ### Day 5 - Sat 2026-05-09
-- Conformance smoke via FFI path:
-  - representative `valid/invalid/warn` fixtures
+- Harden conformance runner input path:
+  - parse conformance case files via `serde`/`serde_json`
+  - keep `ccml-core` parse/to_json/diagnose as execution target for `input`
 - Deliverables:
-  - FFI 경유 검증 리포트
-  - parity gap 목록
+  - serde-based conformance loading path
+  - runner failure messages separated into schema/load/runtime categories
 
 ### Day 6 - Sun 2026-05-10
-- Python thin adapter kickoff.
-- Minimal usage tests for:
-  - transcode
-  - diagnose
-  - duplicate warning propagation
+- Run conformance smoke through FFI path using representative `valid/invalid/warn` vectors.
+- Start Python thin adapter kickoff.
+- Add minimal usage tests for:
+  - to_json path
+  - diagnose path
+  - duplicate warning propagation (`CCML2001`)
 - Deliverables:
-  - Python adapter 초안
-  - smoke test 결과
+  - FFI smoke report with parity notes
+  - Python adapter prototype and smoke results
 
 ### Day 7 - Mon 2026-05-11
-- Weekly validation and sprint-close:
+- Weekly validation and sprint close:
   - pass-rate snapshot
-  - known gaps and blockers
+  - known gaps/blockers
   - Week 3 priorities
 - Deliverables:
   - week2 review summary
   - sprint3 backlog draft
 
-## 4. Definition of Done (Week 2)
-1. `ccml-ffi` phase-1 함수 세트 구현 완료.
-2. FFI contract tests 통과.
-3. FFI 경유 conformance smoke 통과.
-4. Python adapter로 핵심 호출 성공.
-5. Week 3 착수를 위한 갭 목록 문서화 완료.
+## 5. Definition of Done (Week 2)
+1. `ccml-ffi` phase-1 API is implemented and callable.
+2. FFI contract tests pass for success/error/warn and memory safety basics.
+3. Conformance smoke checks pass through FFI path for selected fixtures.
+4. Conformance loader uses `serde_json` (case files only) and no longer depends on `ccml-core::parse` for vector file parsing.
+5. Core `AST -> JSON` output behavior remains unchanged and still preserves number raw lexemes policy.
+6. Python thin adapter prototype successfully calls FFI happy/error paths.
+7. `cbindgen` header generation path and `wasm-bindgen` baseline are both executable.
 
-## 5. Risks and Mitigations
-1. Risk: FFI 메모리 해제 규약 누락/오용.
-- Mitigation: 모든 반환 포인터를 `ccml_free` 경로로 통일하고 테스트로 강제.
-2. Risk: 바인딩별 예외 처리 편차.
-- Mitigation: return-code + error-json 계약을 바인딩 공통 규약으로 고정.
-3. Risk: conformance parity 누락.
-- Mitigation: Week 2 내 FFI 경유 smoke를 필수 게이트로 설정.
+## 6. Risks and Mitigations
+1. Risk: FFI memory ownership misuse.
+- Mitigation: enforce single free path (`ccml_free`) and test pointer lifecycle explicitly.
 
-## 6. Priority Order
-1. ABI 안정성
-2. 진단/오류 계약 일관성
-3. 바인딩 사용성
+2. Risk: ambiguous failure source in conformance runs.
+- Mitigation: split failure classes into (a) case schema/load, (b) ccml input runtime behavior.
+
+3. Risk: accidental serializer drift by introducing `serde_json` in core output path.
+- Mitigation: keep serializer boundary explicit in code review; add regression checks for escape/number raw behavior.
+
+4. Risk: binding contract drift across runtimes.
+- Mitigation: freeze return-code + error-json envelope before adapter expansion.
+
+## 7. Priority Order
+1. ABI and memory safety
+2. Diagnostic/error contract stability
+3. Conformance runner hardening (loader/schema)
+4. `cbindgen`/`wasm-bindgen` interop baseline
+5. Binding usability kickoff
+6. Conformance case count expansion toward Week 3
+
+## 8. Validation Commands (Target)
+- `cargo test --offline -p ccml-core`
+- `cargo test --offline -p ccml-ffi`
+- `cargo run --offline -p ccml-cli -- conformance ../../tests/conformance`
+- FFI smoke command/script (to be finalized in Week 2 Day 5)
