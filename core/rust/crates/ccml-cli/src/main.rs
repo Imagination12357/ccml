@@ -1,8 +1,42 @@
 use ccml_core::{diagnose, parse, to_json, AstNode, ToJsonOptions};
-use std::collections::BTreeMap;
+use serde::Deserialize;
 use std::fs;
 use std::io::{self, Read};
 use std::path::{Path, PathBuf};
+
+#[derive(Debug, Deserialize)]
+struct ConformanceCase {
+    input: String,
+    expect: Expectation,
+}
+
+#[derive(Debug, Deserialize)]
+#[serde(tag = "status")]
+enum Expectation {
+    #[serde(rename = "ok")]
+    Ok { output_json: String },
+    #[serde(rename = "ok_with_warnings")]
+    OkWithWarnings {
+        output_json: String,
+        warnings: Vec<ExpectedWarning>,
+    },
+    #[serde(rename = "error")]
+    Error { error: ExpectedError },
+}
+
+#[derive(Debug, Deserialize)]
+struct ExpectedWarning {
+    code: String,
+    message_contains: String,
+}
+
+#[derive(Debug, Deserialize)]
+struct ExpectedError {
+    code: String,
+    line: usize,
+    column: usize,
+    message_contains: Option<String>,
+}
 
 fn main() {
     let args: Vec<String> = std::env::args().collect();
@@ -71,62 +105,56 @@ fn list_json_files(dir: &Path) -> Vec<PathBuf> {
 
 fn run_case(path: &Path) -> Result<(), String> {
     let text = fs::read_to_string(path).map_err(|e| format!("read error: {e}"))?;
-    let case_root = parse(&text).map_err(|e| format!("vector parse error: {:?}", e.diagnostics))?;
-    let case_obj = as_object(&case_root)?;
-    let input = as_string(req(case_obj, "input")?)?;
-    let expect = as_object(req(case_obj, "expect")?)?;
-    let status = as_string(req(expect, "status")?)?;
+    let text = strip_utf8_bom(&text);
+    let case: ConformanceCase =
+        serde_json::from_str(text).map_err(|e| format!("vector json decode error: {e}"))?;
 
-    match status {
-        "ok" => validate_ok(input, expect),
-        "ok_with_warnings" => validate_ok_with_warnings(input, expect),
-        "error" => validate_error(input, expect),
-        _ => Err(format!("unknown expect.status: {status}")),
+    match &case.expect {
+        Expectation::Ok { output_json } => validate_ok(&case.input, output_json),
+        Expectation::OkWithWarnings {
+            output_json,
+            warnings,
+        } => validate_ok_with_warnings(&case.input, output_json, warnings),
+        Expectation::Error { error } => validate_error(&case.input, error),
     }
 }
 
-fn validate_ok(input: &str, expect: &BTreeMap<String, AstNode>) -> Result<(), String> {
-    let expected_json = as_string(req(expect, "output_json")?)?;
+fn strip_utf8_bom(input: &str) -> &str {
+    input.strip_prefix('\u{feff}').unwrap_or(input)
+}
+
+fn validate_ok(input: &str, expected_json: &str) -> Result<(), String> {
     let actual_json = to_json(input, &ToJsonOptions { pretty: false })
         .map_err(|e| format!("unexpected parse error: {:?}", e.diagnostics))?;
     assert_json_semantic_eq(&actual_json, expected_json)
 }
 
-fn validate_ok_with_warnings(
-    input: &str,
-    expect: &BTreeMap<String, AstNode>,
-) -> Result<(), String> {
-    let expected_json = as_string(req(expect, "output_json")?)?;
+fn validate_ok_with_warnings(input: &str, expected_json: &str, warnings: &[ExpectedWarning]) -> Result<(), String> {
     let actual_json = to_json(input, &ToJsonOptions { pretty: false })
         .map_err(|e| format!("unexpected parse error: {:?}", e.diagnostics))?;
     assert_json_semantic_eq(&actual_json, expected_json)?;
 
-    let expected_warnings = as_array(req(expect, "warnings")?)?;
     let actual_diags = diagnose(input);
-    for w in expected_warnings {
-        let wobj = as_object(w)?;
-        let code = as_string(req(wobj, "code")?)?;
-        let needle = as_string(req(wobj, "message_contains")?)?;
+    for w in warnings {
         let found = actual_diags
             .iter()
-            .any(|d| d.code == code && d.message.to_lowercase().contains(&needle.to_lowercase()));
+            .any(|d| {
+                d.code == w.code
+                    && d.message
+                        .to_lowercase()
+                        .contains(&w.message_contains.to_lowercase())
+            });
         if !found {
-            return Err(format!("missing warning code={} contains='{}'", code, needle));
+            return Err(format!(
+                "missing warning code={} contains='{}'",
+                w.code, w.message_contains
+            ));
         }
     }
     Ok(())
 }
 
-fn validate_error(input: &str, expect: &BTreeMap<String, AstNode>) -> Result<(), String> {
-    let expected_err = as_object(req(expect, "error")?)?;
-    let expected_code = as_string(req(expected_err, "code")?)?;
-    let expected_line = as_usize(req(expected_err, "line")?)?;
-    let expected_column = as_usize(req(expected_err, "column")?)?;
-    let expected_contains = expected_err
-        .get("message_contains")
-        .map(as_string)
-        .transpose()?;
-
+fn validate_error(input: &str, expected: &ExpectedError) -> Result<(), String> {
     match parse(input) {
         Ok(_) => Err("expected parse error, got success".to_string()),
         Err(err) => {
@@ -134,16 +162,16 @@ fn validate_error(input: &str, expect: &BTreeMap<String, AstNode>) -> Result<(),
                 .diagnostics
                 .first()
                 .ok_or_else(|| "empty diagnostics".to_string())?;
-            if d.code != expected_code {
-                return Err(format!("error code mismatch: {} != {}", d.code, expected_code));
+            if d.code != expected.code {
+                return Err(format!("error code mismatch: {} != {}", d.code, expected.code));
             }
-            if d.line != expected_line || d.column != expected_column {
+            if d.line != expected.line || d.column != expected.column {
                 return Err(format!(
                     "location mismatch: {}:{} != {}:{}",
-                    d.line, d.column, expected_line, expected_column
+                    d.line, d.column, expected.line, expected.column
                 ));
             }
-            if let Some(needle) = expected_contains {
+            if let Some(needle) = &expected.message_contains {
                 if !d.message.to_lowercase().contains(&needle.to_lowercase()) {
                     return Err(format!(
                         "message mismatch: '{}' does not contain '{}'",
@@ -197,38 +225,4 @@ fn numeric_eq(a: &str, b: &str) -> bool {
         return fa == fb;
     }
     a == b
-}
-
-fn req<'a>(obj: &'a BTreeMap<String, AstNode>, key: &str) -> Result<&'a AstNode, String> {
-    obj.get(key).ok_or_else(|| format!("missing field '{}'", key))
-}
-
-fn as_object(node: &AstNode) -> Result<&BTreeMap<String, AstNode>, String> {
-    match node {
-        AstNode::Object(v) => Ok(v),
-        _ => Err("expected object".to_string()),
-    }
-}
-
-fn as_array(node: &AstNode) -> Result<&Vec<AstNode>, String> {
-    match node {
-        AstNode::Array(v) => Ok(v),
-        _ => Err("expected array".to_string()),
-    }
-}
-
-fn as_string(node: &AstNode) -> Result<&str, String> {
-    match node {
-        AstNode::String(v) => Ok(v),
-        _ => Err("expected string".to_string()),
-    }
-}
-
-fn as_usize(node: &AstNode) -> Result<usize, String> {
-    match node {
-        AstNode::Number(v) => v
-            .parse::<usize>()
-            .map_err(|_| format!("expected integer number, got '{}'", v)),
-        _ => Err("expected numeric value".to_string()),
-    }
 }
