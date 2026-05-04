@@ -175,3 +175,13 @@
   - `cargo run --offline -p ccml-cli -- conformance ../../tests/conformance` -> `total=46`, `failed=0`.
 - Document:
   - Day 6 execution status recorded with mode-policy alignment complete.
+
+### Day 7 - Mon 2026-05-04
+- Plan:
+  - Close Week 1 with objective validation and Sprint 2 preparation.
+- Validate:
+  - `cargo test --offline -p ccml-core` passed (10/10).
+  - `cargo run --offline -p ccml-cli -- conformance ../../tests/conformance` -> `total=46`, `failed=0`.
+- Document:
+  - Added week review summary with DoD check and known gaps.
+  - Added Sprint 2 backlog draft with FFI-first priorities.
