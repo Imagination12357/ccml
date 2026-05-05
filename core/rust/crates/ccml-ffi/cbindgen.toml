@@ -1,0 +1,18 @@
+language = "C"
+include_version = true
+pragma_once = true
+documentation = true
+
+include_guard = "CCML_FFI_H"
+
+[parse]
+parse_deps = false
+
+[export]
+include = [
+  "CcmlStatus",
+  "ccml_to_json",
+  "ccml_diagnose",
+  "ccml_version",
+  "ccml_free",
+]
