@@ -4,7 +4,7 @@
 Track independent improvements that are useful but not hard blockers for Week 2 execution.
 
 ## Priority A (High Value, Decoupled)
-1. Conformance schema runtime validation (`jsonschema` crate)
+1. [DONE 2026-05-05] Conformance schema runtime validation (`jsonschema` crate)
 - Goal: validate every case file against `tests/conformance/_schema/ccml-conformance-case.schema.json` before execution.
 - Why later: runner decoupling to `serde_json` is the urgent fix; schema validation can land as a follow-up.
 - Done when:
@@ -12,6 +12,13 @@ Track independent improvements that are useful but not hard blockers for Week 2 
   - valid case files keep existing pass/fail behavior.
 - Validation:
   - `cargo run --offline -p ccml-cli -- conformance ../../tests/conformance`
+- Implementation notes:
+  - Added schema load/compile step in `ccml-cli` conformance path and per-case schema validation before case decode/execute.
+  - Added explicit failure classification for schema path (`FAIL schema: ...`, `schema error: ...`).
+  - Reduced `jsonschema` dependency surface to `default-features = false, features = ["draft202012"]`.
+- Result:
+  - `cargo test --offline -p ccml-cli` passed.
+  - `cargo run --offline -p ccml-cli -- conformance ../../tests/conformance` passed (`total=46, failed=0`).
 
 2. Conformance vector count expansion
 - Goal: increase vectors from 46 to >= 60.

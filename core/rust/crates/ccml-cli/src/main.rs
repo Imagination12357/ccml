@@ -1,4 +1,5 @@
 use ccml_core::{diagnose, parse, to_json, AstNode, ToJsonOptions};
+use jsonschema::JSONSchema;
 use serde::Deserialize;
 use std::fs;
 use std::io::{self, Read};
@@ -68,6 +69,15 @@ fn main() {
 }
 
 fn run_conformance(root: &Path) -> usize {
+    let schema_validator = match load_conformance_schema_validator(root) {
+        Ok(validator) => validator,
+        Err(msg) => {
+            eprintln!("FAIL schema: {msg}");
+            println!("Conformance summary: total=0, failed=1");
+            return 1;
+        }
+    };
+
     let mut total = 0usize;
     let mut failed = 0usize;
 
@@ -77,7 +87,7 @@ fn run_conformance(root: &Path) -> usize {
         files.sort();
         for path in files {
             total += 1;
-            if let Err(msg) = run_case(&path) {
+            if let Err(msg) = run_case(&path, &schema_validator) {
                 failed += 1;
                 eprintln!("FAIL {}: {}", path.display(), msg);
             } else {
@@ -88,6 +98,18 @@ fn run_conformance(root: &Path) -> usize {
 
     println!("Conformance summary: total={}, failed={}", total, failed);
     failed
+}
+
+fn load_conformance_schema_validator(root: &Path) -> Result<JSONSchema, String> {
+    let schema_path = root.join("_schema").join("ccml-conformance-case.schema.json");
+    let schema_text = fs::read_to_string(&schema_path)
+        .map_err(|e| format!("schema read error ({}): {e}", schema_path.display()))?;
+    let schema_text = strip_utf8_bom(&schema_text);
+    let schema_value: serde_json::Value = serde_json::from_str(schema_text)
+        .map_err(|e| format!("schema json decode error ({}): {e}", schema_path.display()))?;
+    JSONSchema::options()
+        .compile(&schema_value)
+        .map_err(|e| format!("schema compile error ({}): {e}", schema_path.display()))
 }
 
 fn list_json_files(dir: &Path) -> Vec<PathBuf> {
@@ -103,11 +125,21 @@ fn list_json_files(dir: &Path) -> Vec<PathBuf> {
     out
 }
 
-fn run_case(path: &Path) -> Result<(), String> {
+fn run_case(path: &Path, schema_validator: &JSONSchema) -> Result<(), String> {
     let text = fs::read_to_string(path).map_err(|e| format!("read error: {e}"))?;
     let text = strip_utf8_bom(&text);
+    let case_value: serde_json::Value =
+        serde_json::from_str(text).map_err(|e| format!("load error: vector json decode error: {e}"))?;
+
+    if let Err(mut errors) = schema_validator.validate(&case_value) {
+        if let Some(err) = errors.next() {
+            return Err(format!("schema error: {err}"));
+        }
+        return Err("schema error: unknown validation failure".to_string());
+    }
+
     let case: ConformanceCase =
-        serde_json::from_str(text).map_err(|e| format!("vector json decode error: {e}"))?;
+        serde_json::from_value(case_value).map_err(|e| format!("load error: vector decode error: {e}"))?;
 
     match &case.expect {
         Expectation::Ok { output_json } => validate_ok(&case.input, output_json),
