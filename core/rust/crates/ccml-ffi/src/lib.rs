@@ -1,3 +1,4 @@
+use ccml_core::{diagnose, to_json, Diagnostic, Severity, ToJsonOptions};
 use std::ffi::{c_char, CString};
 use std::ptr;
 
@@ -27,15 +28,45 @@ pub extern "C" fn ccml_to_json(
     clear_out(out_json);
     clear_out(out_error_json);
 
-    // Day 1 skeleton only: conversion logic lands on Day 2.
-    let _ = input_ptr;
-    let _ = input_len;
-    write_error_json(
-        out_error_json,
-        CcmlStatus::InternalError,
-        "FFI skeleton: ccml_to_json is not implemented yet",
-    );
-    CcmlStatus::InternalError as i32
+    let result = std::panic::catch_unwind(|| {
+        let input = decode_input(input_ptr, input_len)?;
+        match to_json(&input, &ToJsonOptions { pretty: false }) {
+            Ok(json) => {
+                if write_owned_c_string(out_json, &json) {
+                    Ok(CcmlStatus::Ok)
+                } else {
+                    Err(("failed to allocate output json".to_string(), CcmlStatus::InternalError))
+                }
+            }
+            Err(err) => {
+                let payload = error_payload_with_diagnostics(
+                    CcmlStatus::ParseError,
+                    "ccml parse error",
+                    &err.diagnostics,
+                );
+                let _ = write_owned_c_string(out_error_json, &payload);
+                Err(("ccml parse error".to_string(), CcmlStatus::ParseError))
+            }
+        }
+    });
+
+    match result {
+        Ok(Ok(status)) => status as i32,
+        Ok(Err((msg, status))) => {
+            if status != CcmlStatus::ParseError {
+                write_error_json(out_error_json, status, &msg);
+            }
+            status as i32
+        }
+        Err(_) => {
+            write_error_json(
+                out_error_json,
+                CcmlStatus::InternalError,
+                "panic in ccml_to_json",
+            );
+            CcmlStatus::InternalError as i32
+        }
+    }
 }
 
 #[unsafe(no_mangle)]
@@ -52,15 +83,35 @@ pub extern "C" fn ccml_diagnose(
     clear_out(out_diag_json);
     clear_out(out_error_json);
 
-    // Day 1 skeleton only: diagnostics logic lands on Day 2.
-    let _ = input_ptr;
-    let _ = input_len;
-    write_error_json(
-        out_error_json,
-        CcmlStatus::InternalError,
-        "FFI skeleton: ccml_diagnose is not implemented yet",
-    );
-    CcmlStatus::InternalError as i32
+    let result = std::panic::catch_unwind(|| {
+        let input = decode_input(input_ptr, input_len)?;
+        let diagnostics = diagnose(&input);
+        let payload = diagnostics_json_payload(&diagnostics);
+        if write_owned_c_string(out_diag_json, &payload) {
+            Ok(CcmlStatus::Ok)
+        } else {
+            Err((
+                "failed to allocate diagnostics json".to_string(),
+                CcmlStatus::InternalError,
+            ))
+        }
+    });
+
+    match result {
+        Ok(Ok(status)) => status as i32,
+        Ok(Err((msg, status))) => {
+            write_error_json(out_error_json, status, &msg);
+            status as i32
+        }
+        Err(_) => {
+            write_error_json(
+                out_error_json,
+                CcmlStatus::InternalError,
+                "panic in ccml_diagnose",
+            );
+            CcmlStatus::InternalError as i32
+        }
+    }
 }
 
 #[unsafe(no_mangle)]
@@ -129,6 +180,60 @@ fn write_error_json(out_error_json: *mut *mut c_char, status: CcmlStatus, messag
         escape_json_string(message)
     );
     let _ = write_owned_c_string(out_error_json, &payload);
+}
+
+fn error_payload_with_diagnostics(
+    status: CcmlStatus,
+    message: &str,
+    diagnostics: &[Diagnostic],
+) -> String {
+    format!(
+        "{{\"status\":{},\"error_code\":\"{:?}\",\"message\":\"{}\",\"diagnostics\":{}}}",
+        status as i32,
+        status,
+        escape_json_string(message),
+        diagnostics_json_payload(diagnostics)
+    )
+}
+
+fn diagnostics_json_payload(diagnostics: &[Diagnostic]) -> String {
+    let mut out = String::from("[");
+    for (idx, d) in diagnostics.iter().enumerate() {
+        if idx > 0 {
+            out.push(',');
+        }
+        out.push_str(&format!(
+            "{{\"code\":\"{}\",\"message\":\"{}\",\"line\":{},\"column\":{},\"severity\":\"{}\"}}",
+            escape_json_string(&d.code),
+            escape_json_string(&d.message),
+            d.line,
+            d.column,
+            severity_str(d.severity)
+        ));
+    }
+    out.push(']');
+    out
+}
+
+fn severity_str(sev: Severity) -> &'static str {
+    match sev {
+        Severity::Error => "error",
+        Severity::Warning => "warning",
+    }
+}
+
+fn decode_input(input_ptr: *const u8, input_len: usize) -> Result<String, (String, CcmlStatus)> {
+    if input_len == 0 {
+        return Ok(String::new());
+    }
+    if input_ptr.is_null() {
+        return Err(("input_ptr is null with non-zero length".to_string(), CcmlStatus::InvalidArgument));
+    }
+    // Safety: pointer + length validated by caller contract.
+    let bytes = unsafe { std::slice::from_raw_parts(input_ptr, input_len) };
+    let s = std::str::from_utf8(bytes)
+        .map_err(|_| ("input is not valid utf-8".to_string(), CcmlStatus::InvalidUtf8))?;
+    Ok(s.to_owned())
 }
 
 fn escape_json_string(input: &str) -> String {

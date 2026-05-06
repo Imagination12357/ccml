@@ -130,3 +130,23 @@
 - `cargo test --offline -p ccml-ffi`
 - `cargo run --offline -p ccml-cli -- conformance ../../tests/conformance`
 - FFI smoke command/script (to be finalized in Week 2 Day 5)
+
+## 9. Execution Log
+### Day 2 - Wed 2026-05-06
+- Plan:
+  - Implement `ccml_to_json` and `ccml_diagnose` using `ccml-core` APIs.
+  - Add null/UTF-8 argument validation and panic-to-error mapping baseline.
+- Design:
+  - Keep JSON-only C ABI with out-parameters and status-code return.
+  - Keep `ccml_free` as single deallocation path.
+- Implement:
+  - Wired `ccml_to_json` to `ccml_core::to_json` (compact mode).
+  - Wired `ccml_diagnose` to `ccml_core::diagnose`.
+  - Added UTF-8 decode path from `(input_ptr, input_len)`.
+  - Added `catch_unwind` guards for both FFI entrypoints.
+  - Added baseline error JSON payload with optional diagnostics array on parse errors.
+- Validate:
+  - `cargo test --offline -p ccml-ffi` passed.
+  - `cargo test --offline -p ccml-core` passed (10/10).
+- Document:
+  - Day 2 execution status recorded in this log.
