@@ -250,3 +250,30 @@ fn escape_json_string(input: &str) -> String {
     }
     out
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use std::ffi::CStr;
+
+    #[test]
+    fn version_allocates_and_free_releases() {
+        let mut out: *mut c_char = ptr::null_mut();
+        let rc = ccml_version(&mut out as *mut *mut c_char);
+        assert_eq!(rc, CcmlStatus::Ok as i32);
+        assert!(!out.is_null());
+
+        // Safety: out came from ccml_version allocation contract.
+        let s = unsafe { CStr::from_ptr(out) }
+            .to_str()
+            .expect("version should be valid utf-8");
+        assert_eq!(s, VERSION);
+
+        ccml_free(out);
+    }
+
+    #[test]
+    fn free_accepts_null() {
+        ccml_free(ptr::null_mut());
+    }
+}
