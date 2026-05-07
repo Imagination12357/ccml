@@ -102,6 +102,7 @@ name = "ccml-wasm"
 version = "0.1.0"
 dependencies = [
  "ccml-core",
+ "wasm-bindgen",
 ]
 
 [[package]]

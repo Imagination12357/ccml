@@ -150,3 +150,20 @@
   - `cargo test --offline -p ccml-core` passed (10/10).
 - Document:
   - Day 2 execution status recorded in this log.
+
+### Day 3 - Thu 2026-05-07
+- Plan:
+  - Finalize `ccml_version`/`ccml_free` contract confidence with tests.
+  - Add `wasm-bindgen` baseline wiring in `ccml-wasm`.
+- Design:
+  - Keep FFI memory contract explicit and test caller-release behavior.
+  - Expose minimal WASM entrypoints mirroring core behavior (`to_json`, `diagnose`).
+- Implement:
+  - Added FFI tests for version allocation and null-safe free handling.
+  - Added `wasm-bindgen` dependency and baseline exported functions in `ccml-wasm`.
+  - Wired WASM paths to `ccml-core` while keeping core as single source of truth.
+- Validate:
+  - `cargo test --offline -p ccml-ffi` passed (2/2 tests).
+  - `cargo test -p ccml-wasm` passed after dependency fetch.
+- Document:
+  - Day 3 execution status recorded in this log.
