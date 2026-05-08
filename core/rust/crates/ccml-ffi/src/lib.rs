@@ -256,6 +256,17 @@ mod tests {
     use super::*;
     use std::ffi::CStr;
 
+    fn into_string_and_free(ptr: *mut c_char) -> String {
+        assert!(!ptr.is_null());
+        // Safety: ptr must be allocated by this crate via CString::into_raw.
+        let s = unsafe { CStr::from_ptr(ptr) }
+            .to_str()
+            .expect("ffi output should be valid utf-8")
+            .to_string();
+        ccml_free(ptr);
+        s
+    }
+
     #[test]
     fn version_allocates_and_free_releases() {
         let mut out: *mut c_char = ptr::null_mut();
@@ -275,5 +286,106 @@ mod tests {
     #[test]
     fn free_accepts_null() {
         ccml_free(ptr::null_mut());
+    }
+
+    #[test]
+    fn to_json_success_path_returns_json_and_empty_error() {
+        let input = b"a: 1";
+        let mut out_json: *mut c_char = ptr::null_mut();
+        let mut out_err: *mut c_char = ptr::null_mut();
+
+        let rc = ccml_to_json(
+            input.as_ptr(),
+            input.len(),
+            &mut out_json as *mut *mut c_char,
+            &mut out_err as *mut *mut c_char,
+        );
+        assert_eq!(rc, CcmlStatus::Ok as i32);
+        assert!(out_err.is_null());
+        let json = into_string_and_free(out_json);
+        assert_eq!(json, "{\"a\":1}");
+    }
+
+    #[test]
+    fn to_json_parse_error_sets_error_json() {
+        let input = b"a:";
+        let mut out_json: *mut c_char = ptr::null_mut();
+        let mut out_err: *mut c_char = ptr::null_mut();
+
+        let rc = ccml_to_json(
+            input.as_ptr(),
+            input.len(),
+            &mut out_json as *mut *mut c_char,
+            &mut out_err as *mut *mut c_char,
+        );
+        assert_eq!(rc, CcmlStatus::ParseError as i32);
+        assert!(out_json.is_null());
+        let err = into_string_and_free(out_err);
+        assert!(err.contains("\"error_code\":\"ParseError\""));
+        assert!(err.contains("\"diagnostics\""));
+    }
+
+    #[test]
+    fn to_json_invalid_argument_rejects_null_out_pointer() {
+        let input = b"a: 1";
+        let mut out_err: *mut c_char = ptr::null_mut();
+        let rc = ccml_to_json(
+            input.as_ptr(),
+            input.len(),
+            ptr::null_mut(),
+            &mut out_err as *mut *mut c_char,
+        );
+        assert_eq!(rc, CcmlStatus::InvalidArgument as i32);
+        assert!(out_err.is_null());
+    }
+
+    #[test]
+    fn to_json_invalid_utf8_maps_status_and_error_json() {
+        let input: [u8; 1] = [0xff];
+        let mut out_json: *mut c_char = ptr::null_mut();
+        let mut out_err: *mut c_char = ptr::null_mut();
+        let rc = ccml_to_json(
+            input.as_ptr(),
+            input.len(),
+            &mut out_json as *mut *mut c_char,
+            &mut out_err as *mut *mut c_char,
+        );
+        assert_eq!(rc, CcmlStatus::InvalidUtf8 as i32);
+        assert!(out_json.is_null());
+        let err = into_string_and_free(out_err);
+        assert!(err.contains("\"error_code\":\"InvalidUtf8\""));
+    }
+
+    #[test]
+    fn diagnose_warn_path_emits_duplicate_key_warning() {
+        let input = b"x: 1\nx: 2";
+        let mut out_diag: *mut c_char = ptr::null_mut();
+        let mut out_err: *mut c_char = ptr::null_mut();
+
+        let rc = ccml_diagnose(
+            input.as_ptr(),
+            input.len(),
+            &mut out_diag as *mut *mut c_char,
+            &mut out_err as *mut *mut c_char,
+        );
+        assert_eq!(rc, CcmlStatus::Ok as i32);
+        assert!(out_err.is_null());
+        let diag = into_string_and_free(out_diag);
+        assert!(diag.contains("\"code\":\"CCML2001\""));
+        assert!(diag.contains("\"severity\":\"warning\""));
+    }
+
+    #[test]
+    fn diagnose_rejects_null_out_error_pointer() {
+        let input = b"a: 1";
+        let mut out_diag: *mut c_char = ptr::null_mut();
+        let rc = ccml_diagnose(
+            input.as_ptr(),
+            input.len(),
+            &mut out_diag as *mut *mut c_char,
+            ptr::null_mut(),
+        );
+        assert_eq!(rc, CcmlStatus::InvalidArgument as i32);
+        assert!(out_diag.is_null());
     }
 }

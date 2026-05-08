@@ -167,3 +167,20 @@
   - `cargo test -p ccml-wasm` passed after dependency fetch.
 - Document:
   - Day 3 execution status recorded in this log.
+
+### Day 4 - Fri 2026-05-08
+- Plan:
+  - Expand FFI contract tests for success/error/warn and pointer-safety behavior.
+- Design:
+  - Keep tests at ABI boundary (`ccml_to_json`, `ccml_diagnose`, `ccml_version`, `ccml_free`).
+  - Validate status code mapping and out-pointer ownership behavior together.
+- Implement:
+  - Added success-path test for `ccml_to_json`.
+  - Added parse-error and invalid-UTF8 tests for `ccml_to_json` error contract.
+  - Added invalid-argument pointer validation tests.
+  - Added warn-path test for `ccml_diagnose` duplicate-key warning propagation.
+  - Kept `ccml_version`/`ccml_free` contract tests from Day 3.
+- Validate:
+  - `cargo test --offline -p ccml-ffi` passed (8/8 tests).
+- Document:
+  - Day 4 execution status recorded in this log.
