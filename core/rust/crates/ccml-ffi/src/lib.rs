@@ -254,9 +254,11 @@ fn escape_json_string(input: &str) -> String {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use jsonschema::JSONSchema;
     use std::ffi::CStr;
     use std::fs;
     use std::path::PathBuf;
+    use std::sync::OnceLock;
     use serde_json::Value;
 
     fn into_string_and_free(ptr: *mut c_char) -> String {
@@ -492,15 +494,42 @@ mod tests {
     }
 
     fn load_case(rel: &str) -> Value {
-        let base = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+        let base = conformance_base_dir();
+        let text = fs::read_to_string(base.join(rel)).expect("read conformance case");
+        let case: Value = serde_json::from_str(strip_bom(&text)).expect("parse conformance case json");
+        let validator = schema_validator();
+        if let Err(mut errors) = validator.validate(&case) {
+            if let Some(err) = errors.next() {
+                panic!("schema error in {}: {}", rel, err);
+            }
+            panic!("schema error in {}: unknown validation failure", rel);
+        }
+        case
+    }
+
+    fn conformance_base_dir() -> PathBuf {
+        PathBuf::from(env!("CARGO_MANIFEST_DIR"))
             .join("..")
             .join("..")
             .join("..")
             .join("..")
             .join("tests")
-            .join("conformance");
-        let text = fs::read_to_string(base.join(rel)).expect("read conformance case");
-        serde_json::from_str(strip_bom(&text)).expect("parse conformance case json")
+            .join("conformance")
+    }
+
+    fn schema_validator() -> &'static JSONSchema {
+        static SCHEMA: OnceLock<JSONSchema> = OnceLock::new();
+        SCHEMA.get_or_init(|| {
+            let schema_path = conformance_base_dir()
+                .join("_schema")
+                .join("ccml-conformance-case.schema.json");
+            let schema_text = fs::read_to_string(&schema_path).expect("read conformance schema");
+            let schema_json: Value =
+                serde_json::from_str(strip_bom(&schema_text)).expect("parse conformance schema json");
+            JSONSchema::options()
+                .compile(&schema_json)
+                .expect("compile conformance schema")
+        })
     }
 
     fn strip_bom(s: &str) -> &str {

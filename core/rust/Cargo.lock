@@ -95,6 +95,7 @@ name = "ccml-ffi"
 version = "0.1.0"
 dependencies = [
  "ccml-core",
+ "jsonschema",
  "serde_json",
 ]
 
