@@ -8,3 +8,6 @@ crate-type = ["cdylib", "rlib"]
 
 [dependencies]
 ccml-core = { path = "../ccml-core" }
+
+[dev-dependencies]
+serde_json = "1"

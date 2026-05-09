@@ -255,6 +255,9 @@ fn escape_json_string(input: &str) -> String {
 mod tests {
     use super::*;
     use std::ffi::CStr;
+    use std::fs;
+    use std::path::PathBuf;
+    use serde_json::Value;
 
     fn into_string_and_free(ptr: *mut c_char) -> String {
         assert!(!ptr.is_null());
@@ -387,5 +390,120 @@ mod tests {
         );
         assert_eq!(rc, CcmlStatus::InvalidArgument as i32);
         assert!(out_diag.is_null());
+    }
+
+    #[test]
+    fn conformance_smoke_valid_invalid_warn() {
+        run_valid_case("valid/001-basic-object.json");
+        run_invalid_case("invalid/001-missing-colon.json");
+        run_warn_case("warn/001-duplicate-key-keep-last.json");
+    }
+
+    fn run_valid_case(rel: &str) {
+        let case = load_case(rel);
+        let input = case["input"].as_str().expect("input string");
+        let expected_json = case["expect"]["output_json"]
+            .as_str()
+            .expect("output_json string");
+
+        let mut out_json: *mut c_char = ptr::null_mut();
+        let mut out_err: *mut c_char = ptr::null_mut();
+        let rc = ccml_to_json(
+            input.as_ptr(),
+            input.len(),
+            &mut out_json as *mut *mut c_char,
+            &mut out_err as *mut *mut c_char,
+        );
+        assert_eq!(rc, CcmlStatus::Ok as i32);
+        assert!(out_err.is_null());
+
+        let actual_json = into_string_and_free(out_json);
+        let actual_v: Value = serde_json::from_str(&actual_json).expect("actual json parse");
+        let expected_v: Value = serde_json::from_str(expected_json).expect("expected json parse");
+        assert_eq!(actual_v, expected_v);
+    }
+
+    fn run_invalid_case(rel: &str) {
+        let case = load_case(rel);
+        let input = case["input"].as_str().expect("input string");
+        let expected_code = case["expect"]["error"]["code"]
+            .as_str()
+            .expect("error code");
+        let expected_msg = case["expect"]["error"]["message_contains"]
+            .as_str()
+            .expect("message_contains");
+
+        let mut out_json: *mut c_char = ptr::null_mut();
+        let mut out_err: *mut c_char = ptr::null_mut();
+        let rc = ccml_to_json(
+            input.as_ptr(),
+            input.len(),
+            &mut out_json as *mut *mut c_char,
+            &mut out_err as *mut *mut c_char,
+        );
+        assert_eq!(rc, CcmlStatus::ParseError as i32);
+        assert!(out_json.is_null());
+        let err = into_string_and_free(out_err);
+        assert!(err.contains(expected_code));
+        assert!(err.to_lowercase().contains(&expected_msg.to_lowercase()));
+    }
+
+    fn run_warn_case(rel: &str) {
+        let case = load_case(rel);
+        let input = case["input"].as_str().expect("input string");
+        let expected_json = case["expect"]["output_json"]
+            .as_str()
+            .expect("output_json string");
+        let warning_code = case["expect"]["warnings"][0]["code"]
+            .as_str()
+            .expect("warning code");
+        let warning_msg = case["expect"]["warnings"][0]["message_contains"]
+            .as_str()
+            .expect("warning message");
+
+        let mut out_json: *mut c_char = ptr::null_mut();
+        let mut out_err: *mut c_char = ptr::null_mut();
+        let rc = ccml_to_json(
+            input.as_ptr(),
+            input.len(),
+            &mut out_json as *mut *mut c_char,
+            &mut out_err as *mut *mut c_char,
+        );
+        assert_eq!(rc, CcmlStatus::Ok as i32);
+        assert!(out_err.is_null());
+        let actual_json = into_string_and_free(out_json);
+        let actual_v: Value = serde_json::from_str(&actual_json).expect("actual json parse");
+        let expected_v: Value = serde_json::from_str(expected_json).expect("expected json parse");
+        assert_eq!(actual_v, expected_v);
+
+        let mut out_diag: *mut c_char = ptr::null_mut();
+        let mut out_diag_err: *mut c_char = ptr::null_mut();
+        let drc = ccml_diagnose(
+            input.as_ptr(),
+            input.len(),
+            &mut out_diag as *mut *mut c_char,
+            &mut out_diag_err as *mut *mut c_char,
+        );
+        assert_eq!(drc, CcmlStatus::Ok as i32);
+        assert!(out_diag_err.is_null());
+        let diag = into_string_and_free(out_diag);
+        assert!(diag.contains(warning_code));
+        assert!(diag.to_lowercase().contains(&warning_msg.to_lowercase()));
+    }
+
+    fn load_case(rel: &str) -> Value {
+        let base = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+            .join("..")
+            .join("..")
+            .join("..")
+            .join("..")
+            .join("tests")
+            .join("conformance");
+        let text = fs::read_to_string(base.join(rel)).expect("read conformance case");
+        serde_json::from_str(strip_bom(&text)).expect("parse conformance case json")
+    }
+
+    fn strip_bom(s: &str) -> &str {
+        s.strip_prefix('\u{feff}').unwrap_or(s)
     }
 }

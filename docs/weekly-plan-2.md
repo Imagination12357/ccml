@@ -184,3 +184,21 @@
   - `cargo test --offline -p ccml-ffi` passed (8/8 tests).
 - Document:
   - Day 4 execution status recorded in this log.
+
+### Day 5 - Sat 2026-05-09
+- Plan:
+  - Add FFI-path conformance smoke validation for representative `valid/invalid/warn` fixtures.
+- Design:
+  - Reuse existing shared conformance vectors from `tests/conformance`.
+  - Validate through ABI functions (`ccml_to_json`, `ccml_diagnose`) rather than direct core calls.
+- Implement:
+  - Added `ccml-ffi` dev-dependency: `serde_json` (test-only vector loading).
+  - Added smoke test covering:
+    - `valid/001-basic-object.json`
+    - `invalid/001-missing-colon.json`
+    - `warn/001-duplicate-key-keep-last.json`
+  - Added fixture loader with UTF-8 BOM handling in test path.
+- Validate:
+  - `cargo test --offline -p ccml-ffi` passed (9/9 tests).
+- Document:
+  - Day 5 execution status recorded in this log.
