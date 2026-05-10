@@ -202,3 +202,26 @@
   - `cargo test --offline -p ccml-ffi` passed (9/9 tests).
 - Document:
   - Day 5 execution status recorded in this log.
+
+### Day 6 - Sun 2026-05-10
+- Plan:
+  - Kick off Python thin adapter over `ccml-ffi`.
+  - Validate `to_json`, error propagation, and duplicate warning propagation via Python smoke tests.
+- Design:
+  - Keep adapter minimal (`ctypes` bridge only), no parser logic in Python layer.
+  - Preserve memory contract by always routing output buffer release to `ccml_free`.
+- Implement:
+  - Added `bindings/python` `uv` project scaffold (`pyproject.toml`).
+  - Added thin adapter module (`ccml_py.ffi`) exposing `to_json` and `diagnose`.
+  - Added dynamic library lookup policy:
+    - `CCML_FFI_LIB` override
+    - fallback to `core/rust/target/{debug,release}` artifacts
+  - Added Python smoke tests for:
+    - transcode success
+    - parse error propagation (`CcmlFfiError`, status=ParseError)
+    - duplicate warning propagation (`CCML2001`)
+- Validate:
+  - `cargo build --offline -p ccml-ffi` passed.
+  - `uv run python tests/smoke.py` passed (`python smoke: ok`).
+- Document:
+  - Day 6 execution status recorded in this log.
