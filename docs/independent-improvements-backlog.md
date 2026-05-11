@@ -20,12 +20,13 @@ Track independent improvements that are useful but not hard blockers for Week 2 
   - `cargo test --offline -p ccml-cli` passed.
   - `cargo run --offline -p ccml-cli -- conformance ../../tests/conformance` passed (`total=46, failed=0`).
 
-2. Conformance vector count expansion
-- Goal: increase vectors from 46 to >= 60.
+2. Conformance vector count further expansion (post-Week 3)
+- Goal: expand vectors beyond Week 3 baseline from >= 60 to >= 80.
 - Focus classes:
   - control/unicode escape edges
   - mixed delimiter/layout corners
   - diagnostic boundary positions
+  - cross-runtime parity-focused edge scenarios
 - Done when:
   - `tests/conformance/INDEX.md` reflects updated totals and classes.
   - runner remains green for updated suite.
@@ -44,6 +45,35 @@ Track independent improvements that are useful but not hard blockers for Week 2 
 - Done when:
   - existing commands behave identically.
   - help/usage output is deterministic and tested.
+
+5. FFI C header generation smoke check (`cbindgen`)
+- Goal: make header generation reproducible and verified in local/CI utility path.
+- Why independent: does not change parser/binding semantics; packaging hygiene only.
+- Done when:
+  - one command generates `ccml.h` deterministically from `ccml-ffi`.
+  - generated header is validated in a smoke step (no manual edit required).
+
+6. Cross-platform dynamic library name/path diagnostic improvement (Python/Node)
+- Goal: improve failure message quality when FFI dynamic library cannot be found.
+- Why independent: adapter UX improvement only; no runtime contract change.
+- Done when:
+  - error output includes searched paths and override env var guidance.
+  - smoke tests still pass with explicit `CCML_FFI_LIB` override path.
+
+7. Conformance case lint utility (metadata/style guard)
+- Goal: add a lightweight check for fixture consistency (id uniqueness, status/category consistency, trailing whitespace/BOM policy).
+- Why independent: fixture maintenance tool only; runner semantics unchanged.
+- Done when:
+  - lint script reports actionable file-level messages.
+  - existing 46+ fixtures pass lint in repository default state.
+
+## Priority C (Low Risk Cleanup)
+8. Recovery/playbook doc for offline toolchain execution
+- Goal: document canonical fallback commands for PATH/network mismatch (`cargo --offline`, `uv` usage, ffi build path).
+- Why independent: operational documentation only.
+- Done when:
+  - one short runbook exists under `docs/`.
+  - commands are copy-pastable and validated at least once.
 
 ## Explicit Non-Goal
 - Do not replace `ccml-core` AST->JSON serializer with `serde_json`.
