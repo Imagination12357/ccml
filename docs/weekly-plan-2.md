@@ -225,3 +225,22 @@
   - `uv run python tests/smoke.py` passed (`python smoke: ok`).
 - Document:
   - Day 6 execution status recorded in this log.
+
+### Day 7 - Mon 2026-05-11
+- Plan:
+  - Close Week 2 with objective validation snapshot and Sprint 3 handoff artifacts.
+- Design:
+  - Re-run key quality gates (core/ffi/wasm/conformance/python smoke).
+  - Record outcomes and unresolved risks in dedicated week review document.
+- Implement:
+  - Executed validation commands and captured pass/fail snapshot.
+  - Created `docs/week2-review-summary.md`.
+  - Created `docs/sprint3-backlog-draft.md`.
+- Validate:
+  - `cargo test --offline -p ccml-core` passed (10/10).
+  - `cargo test --offline -p ccml-ffi` passed (9/9).
+  - `cargo test --offline -p ccml-wasm` passed (compile-level baseline).
+  - `cargo run --offline -p ccml-cli -- conformance ../../tests/conformance` passed (`total=46`, `failed=0`).
+  - `uv run python tests/smoke.py` passed (`python smoke: ok`).
+- Document:
+  - Day 7 execution status recorded in this log.
