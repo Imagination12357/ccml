@@ -140,3 +140,31 @@
 - `uv run python tests/smoke.py`
 - Node smoke command (to be finalized with `bindings/node` scaffold)
 - WASM runtime smoke command (to be finalized with harness setup)
+
+## 9. Execution Log
+### Day 1 - Tue 2026-05-12
+- Plan:
+  - Define Node phase-1 boundary and parity targets against Python thin adapter.
+  - Build Node skeleton without changing `ccml-core` or FFI semantics.
+- Design:
+  - `bindings/node` owns runtime integration only.
+  - Env override + fallback library resolution policy mirrors Python adapter.
+  - Day 1 keeps symbol list and load contract explicit; functional wrappers deferred to Day 2.
+- Implement:
+  - Added `bindings/node` skeleton:
+    - `package.json`
+    - `src/contract.js`
+    - `src/loader.js`
+    - `src/index.js`
+    - `tests/day1-smoke.mjs`
+  - Added Node parity checklist draft:
+    - `docs/node-phase1-parity-checklist.md`
+- Validate:
+  - `node bindings/node/tests/day1-smoke.mjs` passed.
+  - Verified FFI export symbols from `core/rust/target/debug/ccml_ffi.dll`:
+    - `ccml_to_json`
+    - `ccml_diagnose`
+    - `ccml_version`
+    - `ccml_free`
+- Document:
+  - Recorded Day 1 implementation and validation status in this log.

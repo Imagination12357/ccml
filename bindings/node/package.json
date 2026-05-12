@@ -1,0 +1,13 @@
+{
+  "name": "ccml-node",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "CCML Node phase-1 binding skeleton over ccml-ffi",
+  "scripts": {
+    "smoke:day1": "node tests/day1-smoke.mjs"
+  },
+  "engines": {
+    "node": ">=22"
+  }
+}
