@@ -168,3 +168,29 @@
     - `ccml_free`
 - Document:
   - Recorded Day 1 implementation and validation status in this log.
+
+### Day 2 - Wed 2026-05-13
+- Plan:
+  - Implement Node minimal wrappers over `ccml-ffi` for `to_json` and `diagnose`.
+  - Add error payload/status mapping aligned with Python adapter behavior.
+- Design:
+  - Use `koffi` as Node-side FFI layer.
+  - Keep wrapper surface minimal (`createCcmlFfi`, `CcmlFfiError`) and no parser logic in Node.
+- Implement:
+  - Updated `bindings/node/package.json`:
+    - added `koffi` dependency
+    - added `smoke:day2` script
+  - Added `bindings/node/src/ffi.js`:
+    - `createCcmlFfi()` with `toJson()` and `diagnose()` wrappers
+    - status-based error mapping to `CcmlFfiError`
+    - JSON error payload decode path
+  - Added `bindings/node/tests/day2-smoke.mjs`:
+    - success path assertion
+    - parse error status assertion (`3`)
+    - warning assertion (`CCML2001`)
+- Validate:
+  - `node bindings/node/tests/day2-smoke.mjs` passed.
+  - During implementation, invalid `koffi` out-parameter signatures caused FFI panics; fixed by aligning with `char**` out contract.
+- Document:
+  - Day 2 status recorded here.
+  - Note: direct caller-managed pointer release (`ccml_free`) integration in Node wrapper is still a follow-up hardening item due current `koffi` string out-marshal behavior.

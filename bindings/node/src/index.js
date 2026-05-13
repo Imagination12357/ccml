@@ -4,3 +4,4 @@ export {
   phase1Contract,
   resolveLibraryPath
 } from "./loader.js";
+export { CcmlFfiError, createCcmlFfi } from "./ffi.js";
