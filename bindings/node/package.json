@@ -6,7 +6,8 @@
   "description": "CCML Node phase-1 binding skeleton over ccml-ffi",
   "scripts": {
     "smoke:day1": "node tests/day1-smoke.mjs",
-    "smoke:day2": "node tests/day2-smoke.mjs"
+    "smoke:day2": "node tests/day2-smoke.mjs",
+    "smoke:day3": "node tests/day2-smoke.mjs"
   },
   "dependencies": {
     "koffi": "^2.14.1"

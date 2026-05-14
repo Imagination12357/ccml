@@ -1,0 +1,15 @@
+{
+  "success_case": {
+    "input": "name: \"Alice\"\nage: 30",
+    "expected_json": "{\"age\":30,\"name\":\"Alice\"}"
+  },
+  "error_case": {
+    "input": "name \"Alice\"",
+    "expected_status": 3
+  },
+  "warn_case": {
+    "input": "x: 1\nx: 2",
+    "expected_warning_code": "CCML2001",
+    "expected_warning_severity": "warning"
+  }
+}

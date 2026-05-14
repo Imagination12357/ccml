@@ -194,3 +194,29 @@
 - Document:
   - Day 2 status recorded here.
   - Note: direct caller-managed pointer release (`ccml_free`) integration in Node wrapper is still a follow-up hardening item due current `koffi` string out-marshal behavior.
+
+### Day 3 - Thu 2026-05-14
+- Plan:
+  - Lock warn-path parity explicitly across Python and Node smoke checks.
+  - Normalize smoke assertions so both bindings consume one shared expectation source.
+- Design:
+  - Introduce shared parity fixture file under `tests/bindings/`.
+  - Keep per-binding smoke runners thin; move case data to common JSON.
+  - Add one cross-binding execution script for quick parity gate.
+- Implement:
+  - Added shared fixture:
+    - `tests/bindings/parity-smoke-cases.json`
+  - Updated Python smoke to consume shared fixture:
+    - `bindings/python/tests/smoke.py`
+  - Updated Node smoke to consume shared fixture:
+    - `bindings/node/tests/day2-smoke.mjs`
+  - Added cross-binding smoke runner:
+    - `tests/bindings/run-parity-smoke.ps1`
+  - Added Node script alias for Day 3 smoke:
+    - `bindings/node/package.json` (`smoke:day3`)
+- Validate:
+  - `node bindings/node/tests/day2-smoke.mjs` passed.
+  - `uv run python tests/smoke.py` passed (with `UV_CACHE_DIR=.uv-cache`).
+  - `powershell -ExecutionPolicy Bypass -File tests/bindings/run-parity-smoke.ps1` passed.
+- Document:
+  - Day 3 status recorded here.
