@@ -241,6 +241,8 @@
     - `cargo test --offline -p ccml-ffi`
     - `cargo run --offline -p ccml-cli -- conformance ../../tests/conformance`
     - `UV_CACHE_DIR=.uv-cache uv run python tests/smoke.py`
-  - CI workflow execution result is pending first remote run.
+  - First remote CI run exposed a Python smoke library path bug.
+  - Fixed `CCML_FFI_LIB` to use repository-root absolute path:
+    - `core/rust/target/debug/libccml_ffi.so`
 - Document:
   - Day 4 status recorded here.

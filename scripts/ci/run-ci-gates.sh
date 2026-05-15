@@ -1,8 +1,13 @@
 #!/usr/bin/env bash
 set -u
 
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
+cd "$REPO_ROOT"
+
 mkdir -p artifacts/ci
 SUMMARY_PATH="artifacts/ci/gate-summary.md"
+FFI_LIB_PATH="$REPO_ROOT/core/rust/target/debug/libccml_ffi.so"
 
 status_core="pass"
 status_ffi="pass"
@@ -36,7 +41,7 @@ if ! run_gate "conformance" bash -lc "cd core/rust && cargo run --offline -p ccm
   status_conformance="fail"
 fi
 
-if ! run_gate "python_smoke" bash -lc "cd bindings/python && UV_CACHE_DIR=.uv-cache CCML_FFI_LIB=$PWD/../../core/rust/target/debug/libccml_ffi.so uv run python tests/smoke.py"; then
+if ! run_gate "python_smoke" bash -lc "cd '$REPO_ROOT/bindings/python' && UV_CACHE_DIR=.uv-cache CCML_FFI_LIB='$FFI_LIB_PATH' uv run python tests/smoke.py"; then
   status_python="fail"
 fi
 
