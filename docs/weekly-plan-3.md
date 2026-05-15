@@ -220,3 +220,27 @@
   - `powershell -ExecutionPolicy Bypass -File tests/bindings/run-parity-smoke.ps1` passed.
 - Document:
   - Day 3 status recorded here.
+
+### Day 4 - Fri 2026-05-15
+- Plan:
+  - Add CI baseline gates for core/ffi/conformance/python smoke.
+  - Produce one pass/fail summary artifact per run.
+- Design:
+  - Keep a single workflow/job first; avoid matrix expansion in Day 4.
+  - Use one shell runner script to centralize gate commands and summary generation.
+- Implement:
+  - Added GitHub Actions workflow:
+    - `.github/workflows/ci-gates.yml`
+  - Added gate runner script:
+    - `scripts/ci/run-ci-gates.sh`
+  - Added artifact output contract:
+    - `artifacts/ci/gate-summary.md` (generated at runtime)
+- Validate:
+  - Local gate commands passed:
+    - `cargo test --offline -p ccml-core`
+    - `cargo test --offline -p ccml-ffi`
+    - `cargo run --offline -p ccml-cli -- conformance ../../tests/conformance`
+    - `UV_CACHE_DIR=.uv-cache uv run python tests/smoke.py`
+  - CI workflow execution result is pending first remote run.
+- Document:
+  - Day 4 status recorded here.

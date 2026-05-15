@@ -1,0 +1,38 @@
+name: ci-gates
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  gates:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: Setup uv
+        uses: astral-sh/setup-uv@v3
+
+      - name: Prime Cargo cache for offline runs
+        working-directory: core/rust
+        run: cargo fetch --locked
+
+      - name: Run CI gates
+        shell: bash
+        run: bash scripts/ci/run-ci-gates.sh
+
+      - name: Upload gate summary artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ci-gate-summary
+          path: artifacts/ci/gate-summary.md
