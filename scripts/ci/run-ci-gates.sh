@@ -6,6 +6,7 @@ SUMMARY_PATH="artifacts/ci/gate-summary.md"
 
 status_core="pass"
 status_ffi="pass"
+status_ffi_build="pass"
 status_conformance="pass"
 status_python="pass"
 
@@ -27,16 +28,20 @@ if ! run_gate "ffi" bash -lc "cd core/rust && cargo test --offline -p ccml-ffi";
   status_ffi="fail"
 fi
 
+if ! run_gate "ffi_build" bash -lc "cd core/rust && cargo build --offline -p ccml-ffi"; then
+  status_ffi_build="fail"
+fi
+
 if ! run_gate "conformance" bash -lc "cd core/rust && cargo run --offline -p ccml-cli -- conformance ../../tests/conformance"; then
   status_conformance="fail"
 fi
 
-if ! run_gate "python_smoke" bash -lc "cd bindings/python && UV_CACHE_DIR=.uv-cache uv run python tests/smoke.py"; then
+if ! run_gate "python_smoke" bash -lc "cd bindings/python && UV_CACHE_DIR=.uv-cache CCML_FFI_LIB=$PWD/../../core/rust/target/debug/libccml_ffi.so uv run python tests/smoke.py"; then
   status_python="fail"
 fi
 
 overall="pass"
-if [[ "$status_core" != "pass" || "$status_ffi" != "pass" || "$status_conformance" != "pass" || "$status_python" != "pass" ]]; then
+if [[ "$status_core" != "pass" || "$status_ffi" != "pass" || "$status_ffi_build" != "pass" || "$status_conformance" != "pass" || "$status_python" != "pass" ]]; then
   overall="fail"
 fi
 
@@ -46,6 +51,7 @@ cat >"$SUMMARY_PATH" <<EOF
 - overall: ${overall}
 - core: ${status_core}
 - ffi: ${status_ffi}
+- ffi_build: ${status_ffi_build}
 - conformance: ${status_conformance}
 - python_smoke: ${status_python}
 EOF
