@@ -4,6 +4,7 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
 cd "$REPO_ROOT"
+RUST_WORKSPACE_ROOT="$REPO_ROOT/core/rust"
 
 OUT_DIR="$REPO_ROOT/core/rust/target/wasm-smoke"
 mkdir -p "$OUT_DIR"
@@ -14,7 +15,7 @@ if ! command -v wasm-bindgen >/dev/null 2>&1; then
   cargo install --locked wasm-bindgen-cli
 fi
 
-cargo build --release -p ccml-wasm --target wasm32-unknown-unknown
+cargo -C "$RUST_WORKSPACE_ROOT" build --release -p ccml-wasm --target wasm32-unknown-unknown
 
 wasm-bindgen \
   --target nodejs \
