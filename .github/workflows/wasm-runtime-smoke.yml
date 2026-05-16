@@ -2,7 +2,23 @@ name: wasm-runtime-smoke
 
 on:
   push:
+    paths:
+      - ".github/workflows/wasm-runtime-smoke.yml"
+      - "core/rust/**"
+      - "tests/wasm/**"
+      - "tests/bindings/parity-smoke-cases.json"
+      - "scripts/wasm/**"
   pull_request:
+    paths:
+      - ".github/workflows/wasm-runtime-smoke.yml"
+      - "core/rust/**"
+      - "tests/wasm/**"
+      - "tests/bindings/parity-smoke-cases.json"
+      - "scripts/wasm/**"
+
+concurrency:
+  group: wasm-runtime-smoke-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   smoke:
@@ -13,6 +29,25 @@ jobs:
 
       - name: Setup Rust
         uses: dtolnay/rust-toolchain@stable
+
+      - name: Rust cache
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: |
+            core/rust
+            .
+
+      - name: Cache wasm-bindgen-cli
+        id: cache-wasm-bindgen
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/bin/wasm-bindgen
+            ~/.cargo/bin/wasm-bindgen-test-runner
+            ~/.cargo/bin/wasm2es6js
+            ~/.cargo/.crates.toml
+            ~/.cargo/.crates2.json
+          key: ${{ runner.os }}-wasm-bindgen-cli-0.2.121
 
       - name: Setup Node
         uses: actions/setup-node@v4

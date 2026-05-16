@@ -12,7 +12,7 @@ mkdir -p "$OUT_DIR"
 rustup target add wasm32-unknown-unknown
 
 if ! command -v wasm-bindgen >/dev/null 2>&1; then
-  cargo install --locked wasm-bindgen-cli
+  cargo install --locked wasm-bindgen-cli --version 0.2.121
 fi
 
 cargo -C "$RUST_WORKSPACE_ROOT" build --release -p ccml-wasm --target wasm32-unknown-unknown
