@@ -246,3 +246,27 @@
     - `core/rust/target/debug/libccml_ffi.so`
 - Document:
   - Day 4 status recorded here.
+
+### Day 5 - Sat 2026-05-16
+- Plan:
+  - Add a reproducible WASM runtime smoke path in JS runtime.
+  - Verify success/error/warn behavior through exported wasm functions.
+- Design:
+  - Build wasm artifact from `ccml-wasm` crate (`wasm32-unknown-unknown` target).
+  - Package with `wasm-bindgen` for Node runtime.
+  - Reuse shared parity fixture for behavior checks.
+- Implement:
+  - Added runtime smoke test:
+    - `tests/wasm/runtime-smoke.mjs`
+  - Added build/run harness:
+    - `scripts/wasm/build-and-run-smoke.sh`
+  - Added CI workflow:
+    - `.github/workflows/wasm-runtime-smoke.yml`
+  - Added verification notes:
+    - `docs/wasm-runtime-smoke-notes.md`
+- Validate:
+  - `node --check tests/wasm/runtime-smoke.mjs` passed.
+  - `cargo test --offline -p ccml-wasm` passed.
+  - End-to-end wasm runtime smoke command was not executed locally because `wasm-bindgen`/`wasm-pack` toolchain is unavailable in this Windows environment.
+- Document:
+  - Day 5 status recorded here.
