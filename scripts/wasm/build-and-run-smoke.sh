@@ -15,7 +15,10 @@ if ! command -v wasm-bindgen >/dev/null 2>&1; then
   cargo install --locked wasm-bindgen-cli --version 0.2.121
 fi
 
-cargo -C "$RUST_WORKSPACE_ROOT" build --release -p ccml-wasm --target wasm32-unknown-unknown
+(
+  cd "$RUST_WORKSPACE_ROOT"
+  cargo build --release -p ccml-wasm --target wasm32-unknown-unknown
+)
 
 wasm-bindgen \
   --target nodejs \
