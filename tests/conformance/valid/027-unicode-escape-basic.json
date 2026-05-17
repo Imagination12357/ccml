@@ -1,0 +1,11 @@
+{
+    "schema_version":  "1.0.0",
+    "id":  "valid.unicode.escape_basic.027",
+    "category":  "valid",
+    "description":  "Unicode escapes decode in string values.",
+    "input":  "msg: \"\\u0041\\u0042\"",
+    "expect":  {
+                   "status":  "ok",
+                   "output_json":  "{\"msg\":\"AB\"}"
+               }
+}

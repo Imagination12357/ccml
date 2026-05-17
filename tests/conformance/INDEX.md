@@ -1,10 +1,10 @@
 # CCML Conformance Vector Index
 
 ## Summary
-- Total cases: 46
-- valid: 26
+- Total cases: 60
+- valid: 36
 - invalid: 11
-- warn: 9
+- warn: 13
 
 ## Schema
 - Case schema: `tests/conformance/_schema/ccml-conformance-case.schema.json`
@@ -36,6 +36,8 @@
 - booleans, null
 - negative and exponent numbers
 - escaped strings
+- unicode escape decoding
+- uppercase exponent and negative-zero numeric forms
 
 6. Diagnostics
 - missing colon
@@ -49,6 +51,7 @@
 - default behavior: keep-last
 - warning required: `CCML2001`
 - equivalence across quoted/bare key forms
+- replacement across scalar/array/object/null->boolean transitions
 
 ## Notes
 - Current invalid-case line/column positions are draft expectations for parser bring-up and may be adjusted when Rust diagnostics stabilize.

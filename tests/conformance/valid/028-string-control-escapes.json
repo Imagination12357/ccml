@@ -1,0 +1,11 @@
+{
+    "schema_version":  "1.0.0",
+    "id":  "valid.string.control_escapes.028",
+    "category":  "valid",
+    "description":  "Control escape sequences are preserved semantically.",
+    "input":  "msg: \"line1\\nline2\\tend\"",
+    "expect":  {
+                   "status":  "ok",
+                   "output_json":  "{\"msg\":\"line1\\nline2\\tend\"}"
+               }
+}

@@ -1,0 +1,11 @@
+{
+    "schema_version":  "1.0.0",
+    "id":  "valid.array.nested_mixed_layout.033",
+    "category":  "valid",
+    "description":  "Nested arrays and objects parse with mixed separators.",
+    "input":  "arr: [1 {a:2} [3,4] 5]",
+    "expect":  {
+                   "status":  "ok",
+                   "output_json":  "{\"arr\":[1,{\"a\":2},[3,4],5]}"
+               }
+}

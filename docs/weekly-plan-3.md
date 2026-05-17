@@ -270,3 +270,35 @@
   - End-to-end wasm runtime smoke command was not executed locally because `wasm-bindgen`/`wasm-pack` toolchain is unavailable in this Windows environment.
 - Document:
   - Day 5 status recorded here.
+
+### Day 6 - Sun 2026-05-17
+- Plan:
+  - Expand conformance vectors from 46 to at least 60.
+  - Focus on value-lexeme edges and duplicate-key warning variants while keeping runner green.
+- Design:
+  - Add low-risk `valid` and `warn` cases first to avoid diagnostic-location churn in `invalid`.
+  - Reuse shared warning contract (`CCML2001`) and existing schema format.
+- Implement:
+  - Added 10 `valid` cases:
+    - `tests/conformance/valid/027-unicode-escape-basic.json`
+    - `tests/conformance/valid/028-string-control-escapes.json`
+    - `tests/conformance/valid/029-object-mixed-separators.json`
+    - `tests/conformance/valid/030-comment-between-pairs.json`
+    - `tests/conformance/valid/031-uppercase-exponent-number.json`
+    - `tests/conformance/valid/032-negative-zero-number.json`
+    - `tests/conformance/valid/033-array-nested-mixed-layout.json`
+    - `tests/conformance/valid/034-mixed-quoted-and-bare-keys.json`
+    - `tests/conformance/valid/035-empty-string-value.json`
+    - `tests/conformance/valid/036-unicode-symbol-string.json`
+  - Added 4 `warn` cases:
+    - `tests/conformance/warn/010-duplicate-key-quoted-bare-newline.json`
+    - `tests/conformance/warn/011-duplicate-key-array-replacement.json`
+    - `tests/conformance/warn/012-duplicate-key-null-to-bool.json`
+    - `tests/conformance/warn/013-duplicate-key-nested-object-replacement.json`
+  - Updated vector index:
+    - `tests/conformance/INDEX.md`
+- Validate:
+  - `cargo run --offline -p ccml-cli -- conformance ../../tests/conformance` passed.
+  - Result: `total=60`, `failed=0`.
+- Document:
+  - Day 6 status recorded here.

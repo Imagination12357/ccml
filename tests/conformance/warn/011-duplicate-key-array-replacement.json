@@ -1,0 +1,18 @@
+{
+    "schema_version":  "1.0.0",
+    "id":  "warn.duplicate.array_replacement.011",
+    "category":  "warn",
+    "description":  "Duplicate key replacing scalar with array warns and keeps last.",
+    "input":  "v: 1\nv: [2 3]",
+    "expect":  {
+                   "status":  "ok_with_warnings",
+                   "output_json":  "{\"v\":[2,3]}",
+                   "warnings":  [
+                                    {
+                                        "code":  "CCML2001",
+                                        "severity":  "warning",
+                                        "message_contains":  "duplicate key"
+                                    }
+                                ]
+               }
+}

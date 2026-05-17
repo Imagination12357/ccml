@@ -1,0 +1,11 @@
+{
+    "schema_version":  "1.0.0",
+    "id":  "valid.unicode.symbol_string.036",
+    "category":  "valid",
+    "description":  "Unicode symbol escape decodes in string.",
+    "input":  "sym: \"\\u00A9\"",
+    "expect":  {
+                   "status":  "ok",
+                   "output_json":  "{\"sym\":\"©\"}"
+               }
+}

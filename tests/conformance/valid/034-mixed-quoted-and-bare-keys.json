@@ -1,0 +1,11 @@
+{
+    "schema_version":  "1.0.0",
+    "id":  "valid.keys.mixed_quoted_bare.034",
+    "category":  "valid",
+    "description":  "Quoted and bare keys coexist in one object.",
+    "input":  "\"full name\": \"Alice\" age: 30",
+    "expect":  {
+                   "status":  "ok",
+                   "output_json":  "{\"full name\":\"Alice\",\"age\":30}"
+               }
+}

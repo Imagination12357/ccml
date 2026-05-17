@@ -1,0 +1,11 @@
+{
+    "schema_version":  "1.0.0",
+    "id":  "valid.number.uppercase_exponent.031",
+    "category":  "valid",
+    "description":  "Uppercase exponent number lexeme parses.",
+    "input":  "n: 1E+3",
+    "expect":  {
+                   "status":  "ok",
+                   "output_json":  "{\"n\":1E+3}"
+               }
+}

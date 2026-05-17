@@ -1,0 +1,18 @@
+{
+    "schema_version":  "1.0.0",
+    "id":  "warn.duplicate.null_to_bool.012",
+    "category":  "warn",
+    "description":  "Duplicate key changing null to boolean warns.",
+    "input":  "flag: null\nflag: true",
+    "expect":  {
+                   "status":  "ok_with_warnings",
+                   "output_json":  "{\"flag\":true}",
+                   "warnings":  [
+                                    {
+                                        "code":  "CCML2001",
+                                        "severity":  "warning",
+                                        "message_contains":  "duplicate key"
+                                    }
+                                ]
+               }
+}

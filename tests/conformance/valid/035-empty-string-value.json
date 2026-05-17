@@ -1,0 +1,11 @@
+{
+    "schema_version":  "1.0.0",
+    "id":  "valid.string.empty_value.035",
+    "category":  "valid",
+    "description":  "Empty string values parse correctly.",
+    "input":  "s: \"\"",
+    "expect":  {
+                   "status":  "ok",
+                   "output_json":  "{\"s\":\"\"}"
+               }
+}

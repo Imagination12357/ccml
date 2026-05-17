@@ -1,0 +1,11 @@
+{
+    "schema_version":  "1.0.0",
+    "id":  "valid.object.mixed_separators.029",
+    "category":  "valid",
+    "description":  "Object fields accept mixed whitespace and comma separators.",
+    "input":  "o: {a:1 b:2, c:3}",
+    "expect":  {
+                   "status":  "ok",
+                   "output_json":  "{\"o\":{\"a\":1,\"b\":2,\"c\":3}}"
+               }
+}

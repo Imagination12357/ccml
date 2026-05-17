@@ -1,0 +1,11 @@
+{
+    "schema_version":  "1.0.0",
+    "id":  "valid.comment.between_pairs.030",
+    "category":  "valid",
+    "description":  "Comment lines between key-value pairs parse correctly.",
+    "input":  "a: 1\n# middle note\nb: 2",
+    "expect":  {
+                   "status":  "ok",
+                   "output_json":  "{\"a\":1,\"b\":2}"
+               }
+}

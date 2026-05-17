@@ -1,0 +1,11 @@
+{
+    "schema_version":  "1.0.0",
+    "id":  "valid.number.negative_zero.032",
+    "category":  "valid",
+    "description":  "Negative zero parses as valid number lexeme.",
+    "input":  "n: -0",
+    "expect":  {
+                   "status":  "ok",
+                   "output_json":  "{\"n\":-0}"
+               }
+}
