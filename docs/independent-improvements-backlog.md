@@ -32,33 +32,33 @@ Track independent improvements that are useful but not hard blockers for Week 2 
   - runner remains green for updated suite.
 
 ## Priority B (Developer Experience / Maintainability)
-3. `thiserror` integration for internal error typing
-- Goal: reduce manual error mapping boilerplate while keeping external error contract stable.
-- Guardrail: public FFI error JSON envelope must not drift.
-- Done when:
-  - internal errors are typed and mapped consistently.
-  - FFI contract tests remain green.
-
-4. `clap` integration for `ccml-cli`
-- Goal: standardize CLI parsing and prepare flags/subcommands growth.
-- Guardrail: existing behavior (`conformance` mode and stdin path) must remain backward-compatible.
-- Done when:
-  - existing commands behave identically.
-  - help/usage output is deterministic and tested.
-
-5. FFI C header generation smoke check (`cbindgen`)
-- Goal: make header generation reproducible and verified in local/CI utility path.
-- Why independent: does not change parser/binding semantics; packaging hygiene only.
-- Done when:
-  - one command generates `ccml.h` deterministically from `ccml-ffi`.
-  - generated header is validated in a smoke step (no manual edit required).
-
-6. Cross-platform dynamic library name/path diagnostic improvement (Python/Node)
+3. Cross-platform dynamic library name/path diagnostic improvement (Python/Node)
 - Goal: improve failure message quality when FFI dynamic library cannot be found.
 - Why independent: adapter UX improvement only; no runtime contract change.
 - Done when:
   - error output includes searched paths and override env var guidance.
   - smoke tests still pass with explicit `CCML_FFI_LIB` override path.
+
+4. Binding error-message wording consistency pass
+- Goal: align Python/Node "library not found" and "install dependency" error wording for easier triage.
+- Why independent: message quality only; status codes and payload contract unchanged.
+- Done when:
+  - top-level guidance mentions override env vars consistently.
+  - smoke tests still pass with explicit override paths.
+
+5. CI gate summary markdown readability polish
+- Goal: improve `artifacts/ci/gate-summary.md` readability (compact section headings, consistent key order).
+- Why independent: presentation-layer improvement only; gate logic unchanged.
+- Done when:
+  - summary keeps current pass/fail semantics.
+  - output is easier to scan manually in artifact viewer.
+
+6. Conformance index generation helper
+- Goal: provide a tiny helper to recompute `tests/conformance/INDEX.md` totals from filesystem state.
+- Why independent: maintenance tooling only; runner/spec semantics unchanged.
+- Done when:
+  - helper prints deterministic totals by class (`valid/invalid/warn`).
+  - manual index drift can be detected quickly during review.
 
 7. Conformance case lint utility (metadata/style guard)
 - Goal: add a lightweight check for fixture consistency (id uniqueness, status/category consistency, trailing whitespace/BOM policy).
@@ -67,13 +67,48 @@ Track independent improvements that are useful but not hard blockers for Week 2 
   - lint script reports actionable file-level messages.
   - existing 46+ fixtures pass lint in repository default state.
 
+8. Node smoke script CLI UX tidy-up
+- Goal: unify `bindings/node/package.json` smoke script naming (`smoke:day2`, `smoke:day3`, parity alias) with one obvious default.
+- Why independent: command ergonomics only; wrapper/runtime contract unchanged.
+- Done when:
+  - one canonical smoke command exists for developers.
+  - existing smoke assertions stay unchanged.
+
+9. FFI C header generation smoke check (`cbindgen`)
+- Goal: make header generation reproducible and verified in local/CI utility path.
+- Why independent: does not change parser/binding semantics; packaging hygiene only.
+- Done when:
+  - one command generates `ccml.h` deterministically from `ccml-ffi`.
+  - generated header is validated in a smoke step (no manual edit required).
+
+10. `thiserror` integration for internal error typing
+- Goal: reduce manual error mapping boilerplate while keeping external error contract stable.
+- Guardrail: public FFI error JSON envelope must not drift.
+- Done when:
+  - internal errors are typed and mapped consistently.
+  - FFI contract tests remain green.
+
+11. `clap` integration for `ccml-cli`
+- Goal: standardize CLI parsing and prepare flags/subcommands growth.
+- Guardrail: existing behavior (`conformance` mode and stdin path) must remain backward-compatible.
+- Done when:
+  - existing commands behave identically.
+  - help/usage output is deterministic and tested.
+
 ## Priority C (Low Risk Cleanup)
-8. Recovery/playbook doc for offline toolchain execution
+12. Recovery/playbook doc for offline toolchain execution
 - Goal: document canonical fallback commands for PATH/network mismatch (`cargo --offline`, `uv` usage, ffi build path).
 - Why independent: operational documentation only.
 - Done when:
   - one short runbook exists under `docs/`.
   - commands are copy-pastable and validated at least once.
+
+13. WASM smoke artifact cleanup utility
+- Goal: add optional cleanup helper for generated `core/rust/target/wasm-smoke` artifacts.
+- Why independent: local workspace hygiene only; build/test semantics unchanged.
+- Done when:
+  - one documented cleanup command/script exists.
+  - CI/runtime smoke behavior remains unchanged with or without cleanup use.
 
 ## Explicit Non-Goal
 - Do not replace `ccml-core` AST->JSON serializer with `serde_json`.
