@@ -7,7 +7,8 @@
   "scripts": {
     "smoke:day1": "node tests/day1-smoke.mjs",
     "smoke:day2": "node tests/day2-smoke.mjs",
-    "smoke:day3": "node tests/day2-smoke.mjs"
+    "smoke:day3": "node tests/day2-smoke.mjs",
+    "smoke:day1:regression": "node tests/day1-regression.mjs"
   },
   "dependencies": {
     "koffi": "^2.14.1"

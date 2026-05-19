@@ -143,10 +143,23 @@
 ## 9. Execution Log
 ### Day 1
 - Plan:
+  - Scoped Day 1 to Node runtime boundary hardening only (no parser/FFI contract expansion).
+  - Locked first regression shape to repeated mixed call cycles (success -> error -> warn).
 - Design:
+  - Reuse shared parity fixture (`tests/bindings/parity-smoke-cases.json`) to keep cross-binding expectation parity.
+  - Add one dedicated Node regression script to isolate runtime-sequence stability checks.
 - Implement:
+  - Added Node regression smoke:
+    - `bindings/node/tests/day1-regression.mjs`
+  - Added package script:
+    - `bindings/node/package.json` -> `smoke:day1:regression`
+  - Added Day 1 hardening target/matrix note:
+    - `docs/node-memory-regression-matrix.md`
 - Validate:
+  - `node bindings/node/tests/day2-smoke.mjs`
+  - `node bindings/node/tests/day1-regression.mjs`
 - Document:
+  - Recorded Day 1 execution details in this log.
 
 ### Day 2
 - Plan:
