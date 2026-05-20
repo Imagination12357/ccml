@@ -163,10 +163,27 @@
 
 ### Day 2
 - Plan:
+  - Target Day 2 only on CI gate observability and deterministic timeout control.
+  - Keep gate set unchanged; improve only execution guardrails and failure readability.
 - Design:
+  - Add per-gate timeout wrapper in `scripts/ci/run-ci-gates.sh` with explicit reason codes (`ok`, `timeout`, `exit(n)`).
+  - Extend summary artifact with log pointers and failed-gate tail snippets.
+  - Add workflow-level timeout guard in `.github/workflows/ci-gates.yml` for bounded run time.
 - Implement:
+  - Updated `scripts/ci/run-ci-gates.sh`:
+    - per-gate timeout env defaults (`GATE_TIMEOUT_*_SECONDS`)
+    - timeout-based gate execution wrapper
+    - reason fields per gate
+    - log path pointers in summary
+    - failed-gate tail snippet section in summary
+  - Updated `.github/workflows/ci-gates.yml`:
+    - `jobs.gates.timeout-minutes: 35`
+    - `Run CI gates` step timeout: 30 minutes
 - Validate:
+  - `bash -n scripts/ci/run-ci-gates.sh`
+  - YAML field-level sanity check for workflow timeout keys
 - Document:
+  - Recorded Day 2 execution details in this log.
 
 ### Day 3
 - Plan:

@@ -11,11 +11,22 @@ FFI_LIB_PATH="$REPO_ROOT/core/rust/target/debug/libccml_ffi.so"
 LOG_DIR="artifacts/ci/logs"
 mkdir -p "$LOG_DIR"
 
+GATE_TIMEOUT_CORE_SECONDS="${GATE_TIMEOUT_CORE_SECONDS:-900}"
+GATE_TIMEOUT_FFI_SECONDS="${GATE_TIMEOUT_FFI_SECONDS:-900}"
+GATE_TIMEOUT_FFI_BUILD_SECONDS="${GATE_TIMEOUT_FFI_BUILD_SECONDS:-600}"
+GATE_TIMEOUT_CONFORMANCE_SECONDS="${GATE_TIMEOUT_CONFORMANCE_SECONDS:-900}"
+GATE_TIMEOUT_PYTHON_SECONDS="${GATE_TIMEOUT_PYTHON_SECONDS:-600}"
+
 status_core="pass"
 status_ffi="pass"
 status_ffi_build="pass"
 status_conformance="pass"
 status_python="pass"
+reason_core="ok"
+reason_ffi="ok"
+reason_ffi_build="ok"
+reason_conformance="ok"
+reason_python="ok"
 
 core_passed=0
 core_failed=0
@@ -29,32 +40,55 @@ python_failed=0
 run_gate() {
   local gate_name="$1"
   local log_path="$2"
+  local timeout_seconds="$3"
   shift
   shift
-  if "$@" >"$log_path" 2>&1; then
+  shift
+  if timeout --preserve-status "${timeout_seconds}" "$@" >"$log_path" 2>&1; then
+    echo "ok"
     return 0
   fi
+  local rc=$?
+  if [[ "$rc" -eq 124 ]]; then
+    echo "timeout(${timeout_seconds}s)"
+  else
+    echo "exit(${rc})"
+  fi
   echo "gate failed: ${gate_name}" >&2
-  return 1
+  return "$rc"
 }
 
-if ! run_gate "core" "$LOG_DIR/core.log" bash -lc "cd core/rust && cargo test --offline -p ccml-core"; then
+tail_snippet() {
+  local log_path="$1"
+  if [[ ! -f "$log_path" ]]; then
+    echo "(log file missing)"
+    return 0
+  fi
+  tail -n 20 "$log_path" | sed 's/^/    /'
+  return 0
+}
+
+reason_core="$(run_gate "core" "$LOG_DIR/core.log" "$GATE_TIMEOUT_CORE_SECONDS" bash -lc "cd core/rust && cargo test --offline -p ccml-core")"
+if [[ "$reason_core" != "ok" ]]; then
   status_core="fail"
 fi
 core_passed="$(grep -Eo '[0-9]+ passed' "$LOG_DIR/core.log" | awk '{sum += $1} END {print sum+0}')"
 core_failed="$(grep -Eo '[0-9]+ failed' "$LOG_DIR/core.log" | awk '{sum += $1} END {print sum+0}')"
 
-if ! run_gate "ffi" "$LOG_DIR/ffi.log" bash -lc "cd core/rust && cargo test --offline -p ccml-ffi"; then
+reason_ffi="$(run_gate "ffi" "$LOG_DIR/ffi.log" "$GATE_TIMEOUT_FFI_SECONDS" bash -lc "cd core/rust && cargo test --offline -p ccml-ffi")"
+if [[ "$reason_ffi" != "ok" ]]; then
   status_ffi="fail"
 fi
 ffi_passed="$(grep -Eo '[0-9]+ passed' "$LOG_DIR/ffi.log" | awk '{sum += $1} END {print sum+0}')"
 ffi_failed="$(grep -Eo '[0-9]+ failed' "$LOG_DIR/ffi.log" | awk '{sum += $1} END {print sum+0}')"
 
-if ! run_gate "ffi_build" "$LOG_DIR/ffi_build.log" bash -lc "cd core/rust && cargo build --offline -p ccml-ffi"; then
+reason_ffi_build="$(run_gate "ffi_build" "$LOG_DIR/ffi_build.log" "$GATE_TIMEOUT_FFI_BUILD_SECONDS" bash -lc "cd core/rust && cargo build --offline -p ccml-ffi")"
+if [[ "$reason_ffi_build" != "ok" ]]; then
   status_ffi_build="fail"
 fi
 
-if ! run_gate "conformance" "$LOG_DIR/conformance.log" bash -lc "cd core/rust && cargo run --offline -p ccml-cli -- conformance ../../tests/conformance"; then
+reason_conformance="$(run_gate "conformance" "$LOG_DIR/conformance.log" "$GATE_TIMEOUT_CONFORMANCE_SECONDS" bash -lc "cd core/rust && cargo run --offline -p ccml-cli -- conformance ../../tests/conformance")"
+if [[ "$reason_conformance" != "ok" ]]; then
   status_conformance="fail"
 fi
 conformance_line="$(grep -E 'Conformance summary: total=[0-9]+, failed=[0-9]+' "$LOG_DIR/conformance.log" | tail -n 1)"
@@ -63,7 +97,8 @@ if [[ -n "$conformance_line" ]]; then
   conformance_failed="$(echo "$conformance_line" | sed -E 's/.*total=([0-9]+), failed=([0-9]+).*/\2/')"
 fi
 
-if ! run_gate "python_smoke" "$LOG_DIR/python_smoke.log" bash -lc "cd '$REPO_ROOT/bindings/python' && UV_CACHE_DIR=.uv-cache CCML_FFI_LIB='$FFI_LIB_PATH' uv run python tests/smoke.py"; then
+reason_python="$(run_gate "python_smoke" "$LOG_DIR/python_smoke.log" "$GATE_TIMEOUT_PYTHON_SECONDS" bash -lc "cd '$REPO_ROOT/bindings/python' && UV_CACHE_DIR=.uv-cache CCML_FFI_LIB='$FFI_LIB_PATH' uv run python tests/smoke.py")"
+if [[ "$reason_python" != "ok" ]]; then
   status_python="fail"
 fi
 if [[ "$status_python" == "pass" ]]; then
@@ -96,7 +131,48 @@ cat >"$SUMMARY_PATH" <<EOF
 - python_smoke: ${status_python}
 - python_smoke_passed: ${python_passed}
 - python_smoke_failed: ${python_failed}
+- log_dir: ${LOG_DIR}
+- core_log: ${LOG_DIR}/core.log
+- ffi_log: ${LOG_DIR}/ffi.log
+- ffi_build_log: ${LOG_DIR}/ffi_build.log
+- conformance_log: ${LOG_DIR}/conformance.log
+- python_smoke_log: ${LOG_DIR}/python_smoke.log
+- core_reason: ${reason_core}
+- ffi_reason: ${reason_ffi}
+- ffi_build_reason: ${reason_ffi_build}
+- conformance_reason: ${reason_conformance}
+- python_smoke_reason: ${reason_python}
 EOF
+
+{
+  echo
+  echo "## Failed Gates (Tail Snippets)"
+  if [[ "$status_core" == "fail" ]]; then
+    echo
+    echo "### core (${reason_core})"
+    tail_snippet "$LOG_DIR/core.log"
+  fi
+  if [[ "$status_ffi" == "fail" ]]; then
+    echo
+    echo "### ffi (${reason_ffi})"
+    tail_snippet "$LOG_DIR/ffi.log"
+  fi
+  if [[ "$status_ffi_build" == "fail" ]]; then
+    echo
+    echo "### ffi_build (${reason_ffi_build})"
+    tail_snippet "$LOG_DIR/ffi_build.log"
+  fi
+  if [[ "$status_conformance" == "fail" ]]; then
+    echo
+    echo "### conformance (${reason_conformance})"
+    tail_snippet "$LOG_DIR/conformance.log"
+  fi
+  if [[ "$status_python" == "fail" ]]; then
+    echo
+    echo "### python_smoke (${reason_python})"
+    tail_snippet "$LOG_DIR/python_smoke.log"
+  fi
+} >>"$SUMMARY_PATH"
 
 if [[ "$overall" != "pass" ]]; then
   exit 1
