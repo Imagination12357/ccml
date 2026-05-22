@@ -8,9 +8,6 @@ on:
       - "bindings/python/**"
       - "tests/conformance/**"
       - "scripts/ci/**"
-    paths-ignore:
-      - "docs/**"
-      - "old_temp/**"
   pull_request:
     paths:
       - ".github/workflows/ci-gates.yml"
@@ -18,9 +15,6 @@ on:
       - "bindings/python/**"
       - "tests/conformance/**"
       - "scripts/ci/**"
-    paths-ignore:
-      - "docs/**"
-      - "old_temp/**"
   workflow_dispatch:
 
 concurrency:
