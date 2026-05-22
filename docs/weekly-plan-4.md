@@ -187,10 +187,30 @@
 
 ### Day 3
 - Plan:
+  - Limit CI triggers to paths that affect the current gate set (core/ffi/conformance/python/ci scripts).
+  - Add explicit concurrency cancellation to prevent stale runs from consuming queue time.
 - Design:
+  - Use workflow-level `paths` + `paths-ignore` for both `push` and `pull_request`.
+  - Keep manual execution available via `workflow_dispatch`.
+  - Use one deterministic concurrency group keyed by workflow and ref.
 - Implement:
+  - Updated `.github/workflows/ci-gates.yml`:
+    - Added `push.paths`/`pull_request.paths` scoped to:
+      - `.github/workflows/ci-gates.yml`
+      - `core/rust/**`
+      - `bindings/python/**`
+      - `tests/conformance/**`
+      - `scripts/ci/**`
+    - Added `paths-ignore` for `docs/**` and `old_temp/**`
+    - Added `workflow_dispatch`
+    - Added concurrency policy:
+      - `group: ci-gates-${{ github.ref }}`
+      - `cancel-in-progress: true`
 - Validate:
+  - Verified trigger and concurrency keys exist with expected values in workflow file.
+  - Checked that Day 3 scope now matches active gate ownership paths only.
 - Document:
+  - Recorded Day 3 execution details in this log.
 
 ### Day 4
 - Plan:
