@@ -221,10 +221,27 @@
 
 ### Day 5
 - Plan:
+  - Start release-readiness baseline only; do not expand to publish/signing automation.
+  - Add one deterministic version-consistency gate across Rust/Python/Node manifests.
 - Design:
+  - Create a checklist doc with executable gates and RC blocker draft.
+  - Implement a lightweight CI helper script to compare manifest versions:
+    - Rust: `core/rust/Cargo.toml` (`[workspace.package].version`)
+    - Python: `bindings/python/pyproject.toml` (`[project].version`)
+    - Node: `bindings/node/package.json` (`version`)
 - Implement:
+  - Added release-readiness checklist:
+    - `docs/release-readiness-checklist.md`
+  - Added version consistency checker:
+    - `scripts/ci/check-version-consistency.sh`
 - Validate:
+  - Manual source-value check confirms current versions align at `0.1.0`:
+    - `core/rust/Cargo.toml`
+    - `bindings/python/pyproject.toml`
+    - `bindings/node/package.json`
+  - Script execution is intended via bash environments (CI/Linux path).
 - Document:
+  - Recorded Day 5 execution details in this log.
 
 ### Day 6
 - Plan:
