@@ -1,0 +1,18 @@
+{
+  "schema_version": "1.0.0",
+  "id": "warn.duplicate.array_to_object_escape.015",
+  "category": "warn",
+  "description": "Duplicate key replacing array with escaped-string object warns and keeps last.",
+  "input": "v: [1, 2]\nv: {k: \"\\u0041\"}",
+  "expect": {
+    "status": "ok_with_warnings",
+    "output_json": "{\"v\":{\"k\":\"A\"}}",
+    "warnings": [
+      {
+        "code": "CCML2001",
+        "severity": "warning",
+        "message_contains": "duplicate key"
+      }
+    ]
+  }
+}

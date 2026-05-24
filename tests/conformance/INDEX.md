@@ -1,10 +1,10 @@
 # CCML Conformance Vector Index
 
 ## Summary
-- Total cases: 60
+- Total cases: 64
 - valid: 36
-- invalid: 11
-- warn: 13
+- invalid: 13
+- warn: 15
 
 ## Schema
 - Case schema: `tests/conformance/_schema/ccml-conformance-case.schema.json`
@@ -46,12 +46,14 @@
 - trailing token
 - unterminated string
 - invalid number format
+- newline boundary failures after comments/pairs
 
 7. Duplicate key policy
 - default behavior: keep-last
 - warning required: `CCML2001`
 - equivalence across quoted/bare key forms
 - replacement across scalar/array/object/null->boolean transitions
+- mixed stress with comments and escaped string values
 
 ## Notes
 - Current invalid-case line/column positions are draft expectations for parser bring-up and may be adjusted when Rust diagnostics stabilize.

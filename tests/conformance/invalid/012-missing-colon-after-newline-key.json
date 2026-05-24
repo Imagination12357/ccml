@@ -1,0 +1,16 @@
+{
+  "schema_version": "1.0.0",
+  "id": "invalid.missing_colon.newline_key.012",
+  "category": "invalid",
+  "description": "Missing colon on second line after valid first pair.",
+  "input": "a: 1\nb \"x\"",
+  "expect": {
+    "status": "error",
+    "error": {
+      "code": "CCML1004",
+      "line": 2,
+      "column": 3,
+      "message_contains": "colon"
+    }
+  }
+}

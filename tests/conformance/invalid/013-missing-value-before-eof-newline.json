@@ -1,0 +1,16 @@
+{
+  "schema_version": "1.0.0",
+  "id": "invalid.missing_value.before_eof_newline.013",
+  "category": "invalid",
+  "description": "Missing value after colon at line boundary before EOF.",
+  "input": "# header\na:\n",
+  "expect": {
+    "status": "error",
+    "error": {
+      "code": "CCML1001",
+      "line": 3,
+      "column": 1,
+      "message_contains": "value"
+    }
+  }
+}

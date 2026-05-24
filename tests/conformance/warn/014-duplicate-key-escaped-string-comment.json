@@ -1,0 +1,18 @@
+{
+  "schema_version": "1.0.0",
+  "id": "warn.duplicate.escaped_string_comment.014",
+  "category": "warn",
+  "description": "Duplicate key with escaped strings and comment keeps last value with warning.",
+  "input": "msg: \"line\\n1\"\n# overwrite\nmsg: \"line\\t2\"",
+  "expect": {
+    "status": "ok_with_warnings",
+    "output_json": "{\"msg\":\"line\\t2\"}",
+    "warnings": [
+      {
+        "code": "CCML2001",
+        "severity": "warning",
+        "message_contains": "duplicate key"
+      }
+    ]
+  }
+}

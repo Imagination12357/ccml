@@ -245,10 +245,26 @@
 
 ### Day 6
 - Plan:
+  - Expand conformance with focused invalid diagnostic-boundary cases.
+  - Add mixed stress warn cases combining duplicate-key policy with escapes/comments/layout.
 - Design:
+  - Keep schema shape unchanged and append numbered cases only.
+  - Add 2 `invalid` + 2 `warn` cases to raise quality depth without widening feature scope.
 - Implement:
+  - Added invalid diagnostic-boundary cases:
+    - `tests/conformance/invalid/012-missing-colon-after-newline-key.json`
+    - `tests/conformance/invalid/013-missing-value-before-eof-newline.json`
+  - Added mixed stress warn cases:
+    - `tests/conformance/warn/014-duplicate-key-escaped-string-comment.json`
+    - `tests/conformance/warn/015-duplicate-key-array-to-object-escape.json`
+  - Updated conformance index summary/classes:
+    - `tests/conformance/INDEX.md`
 - Validate:
+  - `cargo run --offline -p ccml-cli -- conformance ../../tests/conformance`
+  - Result: `total=64`, `failed=0`
+  - Note: one initial location mismatch on new invalid case `013` was corrected to observed parser location (`3:1`), then rerun green.
 - Document:
+  - Recorded Day 6 execution details in this log.
 
 ### Day 7
 - Plan:
