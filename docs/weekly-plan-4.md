@@ -268,7 +268,28 @@
 
 ### Day 7
 - Plan:
+  - Re-run Week 4 quality gates for closeout snapshot.
+  - Capture residual risk explicitly where local environment cannot execute all planned paths.
 - Design:
+  - Use same Rust/conformance/binding commands as earlier days for comparability.
+  - Treat platform/toolchain-unavailable paths as partial validation, not silent pass.
 - Implement:
+  - Re-ran:
+    - `cargo test --offline -p ccml-core`
+    - `cargo test --offline -p ccml-ffi`
+    - `cargo run --offline -p ccml-cli -- conformance ../../tests/conformance`
+    - `powershell -ExecutionPolicy Bypass -File tests/bindings/run-parity-smoke.ps1`
+    - `node bindings/node/tests/day1-regression.mjs`
+  - Added Week 4 closeout docs:
+    - `docs/week4-review-summary.md`
+    - `docs/sprint5-backlog-draft.md`
 - Validate:
+  - `ccml-core`: 10 passed, 0 failed.
+  - `ccml-ffi`: 9 passed, 0 failed.
+  - conformance: `total=64`, `failed=0`.
+  - parity smoke: passed.
+  - Node regression: passed (`150 mixed cycles`).
+  - `uv run python tests/smoke.py`: direct invocation failed on host cache path conflict; same smoke passed via parity script with `UV_CACHE_DIR=.uv-cache`.
+  - `bash scripts/wasm/build-and-run-smoke.sh`: not executable in this Windows environment (`bash` unavailable).
 - Document:
+  - Recorded Day 7 execution details in this log.
