@@ -154,10 +154,25 @@
 ## 9. Execution Log
 ### Day 1
 - Plan:
+  - Fixed Day 1 scope to Node ownership closure only; no parser/core semantic changes.
+  - Locked acceptance criteria to explicit allocation/decode/free behavior at Node boundary.
 - Design:
+  - Replaced marshaling-dependent out-string flow with pointer-ownership flow aligned to `ccml_free`.
+  - Added deterministic cleanup path (`finally`) so partial failures still release any outstanding pointer.
 - Implement:
+  - Updated Node FFI wrapper to consume owned output pointers and free them explicitly:
+    - `bindings/node/src/ffi.js`
+  - Expanded Node Day 1 regression coverage:
+    - increased mixed-call loop count
+    - added large payload success checks
+    - added multiple invalid-input error checks
+    - `bindings/node/tests/day1-regression.mjs`
 - Validate:
+  - `node bindings/node/tests/day2-smoke.mjs`
+  - `node bindings/node/tests/day1-regression.mjs`
 - Document:
+  - Added Day 1 ownership design note:
+    - `docs/node-memory-ownership-day1.md`
 
 ### Day 2
 - Plan:

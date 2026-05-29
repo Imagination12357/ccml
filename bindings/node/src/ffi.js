@@ -42,40 +42,71 @@ export async function createCcmlFfi() {
   }
 
   const lib = koffi.load(resolveLibraryPath());
-  const OutCStringPtr = koffi.out(koffi.pointer("char", 2));
+  const OpaquePtr = koffi.pointer(koffi.opaque());
+  const OutOwnedCStringPtr = koffi.out(koffi.pointer(OpaquePtr));
   const ccmlToJson = lib.func("ccml_to_json", "int32_t", [
-    "str",
+    "void *",
     "uintptr_t",
-    OutCStringPtr,
-    OutCStringPtr
+    OutOwnedCStringPtr,
+    OutOwnedCStringPtr
   ]);
   const ccmlDiagnose = lib.func("ccml_diagnose", "int32_t", [
-    "str",
+    "void *",
     "uintptr_t",
-    OutCStringPtr,
-    OutCStringPtr
+    OutOwnedCStringPtr,
+    OutOwnedCStringPtr
   ]);
+  const ccmlFree = lib.func("ccml_free", "void", [OpaquePtr]);
+
+  function consumeOwnedCString(slot) {
+    const ptr = slot[0];
+    slot[0] = null;
+    if (!ptr) {
+      return "";
+    }
+    const decoded = koffi.decode(ptr, "char", -1);
+    ccmlFree(ptr);
+    return decoded ?? "";
+  }
+
+  function releaseOwnedCString(slot) {
+    const ptr = slot[0];
+    slot[0] = null;
+    if (ptr) {
+      ccmlFree(ptr);
+    }
+  }
 
   function toJson(input) {
     const bytes = Buffer.from(input, "utf8");
-    const outJson = [""];
-    const outErr = [""];
-    const status = ccmlToJson(input, bytes.length, outJson, outErr);
-    if (status !== CCML_STATUS.OK) {
-      throw new CcmlFfiError(status, decodeErrorPayload(outErr[0]));
+    const outJson = [null];
+    const outErr = [null];
+    try {
+      const status = ccmlToJson(bytes, bytes.length, outJson, outErr);
+      if (status !== CCML_STATUS.OK) {
+        throw new CcmlFfiError(status, decodeErrorPayload(consumeOwnedCString(outErr)));
+      }
+      return consumeOwnedCString(outJson);
+    } finally {
+      releaseOwnedCString(outJson);
+      releaseOwnedCString(outErr);
     }
-    return outJson[0] ?? "";
   }
 
   function diagnose(input) {
     const bytes = Buffer.from(input, "utf8");
-    const outDiag = [""];
-    const outErr = [""];
-    const status = ccmlDiagnose(input, bytes.length, outDiag, outErr);
-    if (status !== CCML_STATUS.OK) {
-      throw new CcmlFfiError(status, decodeErrorPayload(outErr[0]));
+    const outDiag = [null];
+    const outErr = [null];
+    try {
+      const status = ccmlDiagnose(bytes, bytes.length, outDiag, outErr);
+      if (status !== CCML_STATUS.OK) {
+        throw new CcmlFfiError(status, decodeErrorPayload(consumeOwnedCString(outErr)));
+      }
+      return normalizeDiagnostics(JSON.parse(consumeOwnedCString(outDiag) || "[]"));
+    } finally {
+      releaseOwnedCString(outDiag);
+      releaseOwnedCString(outErr);
     }
-    return normalizeDiagnostics(JSON.parse(outDiag[0] ?? "[]"));
   }
 
   return {
