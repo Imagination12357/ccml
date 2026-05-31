@@ -1,4 +1,4 @@
-use std::collections::{btree_map::Entry, BTreeMap};
+use std::collections::{BTreeMap, btree_map::Entry};
 
 use crate::ast::AstNode;
 use crate::diag::{CcmlError, Diagnostic, Severity};
@@ -32,9 +32,9 @@ impl<'a> Parser<'a> {
             AstNode::Object(BTreeMap::new())
         } else {
             match self.peek() {
-            Some('{') => self.parse_object(),
-            Some('[') => self.parse_array(),
-            _ => self.parse_implicit_root_object(),
+                Some('{') => self.parse_object(),
+                Some('[') => self.parse_array(),
+                _ => self.parse_implicit_root_object(),
             }?
         };
         Ok((ast, self.diagnostics))
@@ -181,9 +181,9 @@ impl<'a> Parser<'a> {
         let start_line = self.line;
         let start_col = self.col;
         let start = self.idx;
-        while let Some(ch) = self.peek() {
-            if is_bare_key_char(ch) {
-                self.bump();
+        while let Some(byte) = self.peek_byte() {
+            if is_bare_key_byte(byte) {
+                self.bump_ascii_byte(byte);
             } else {
                 break;
             }
@@ -192,7 +192,7 @@ impl<'a> Parser<'a> {
             return Err(self.err("CCML1006", "invalid key token"));
         }
         let key = &self.src[start..self.idx];
-        if key.chars().all(|c| c == '.' || c == '-') {
+        if key.as_bytes().iter().all(|b| *b == b'.' || *b == b'-') {
             return Err(self.err_at("CCML1006", "invalid key token", start_line, start_col));
         }
         Ok(key.to_string())
@@ -243,7 +243,7 @@ impl<'a> Parser<'a> {
                                 "invalid string escape",
                                 start_line,
                                 start_col,
-                            ))
+                            ));
                         }
                     }
                 }
@@ -275,43 +275,60 @@ impl<'a> Parser<'a> {
         let start_line = self.line;
         let start_col = self.col;
         let start = self.idx;
-        if self.match_char('-') {}
+        if self.match_byte(b'-') {}
 
-        match self.peek() {
-            Some('0') => {
-                self.bump();
-                if matches!(self.peek(), Some('0'..='9')) {
-                    return Err(self.err_at("CCML1003", "invalid number format", start_line, start_col));
+        match self.peek_byte() {
+            Some(b'0') => {
+                self.bump_ascii_byte(b'0');
+                if matches!(self.peek_byte(), Some(b'0'..=b'9')) {
+                    return Err(self.err_at(
+                        "CCML1003",
+                        "invalid number format",
+                        start_line,
+                        start_col,
+                    ));
                 }
             }
-            Some('1'..='9') => {
-                self.bump();
-                while matches!(self.peek(), Some('0'..='9')) {
-                    self.bump();
+            Some(byte @ b'1'..=b'9') => {
+                self.bump_ascii_byte(byte);
+                while let Some(byte @ b'0'..=b'9') = self.peek_byte() {
+                    self.bump_ascii_byte(byte);
                 }
             }
-            _ => return Err(self.err_at("CCML1003", "invalid number format", start_line, start_col)),
-        }
-
-        if self.match_char('.') {
-            if !matches!(self.peek(), Some('0'..='9')) {
+            _ => {
                 return Err(self.err_at("CCML1003", "invalid number format", start_line, start_col));
-            }
-            while matches!(self.peek(), Some('0'..='9')) {
-                self.bump();
             }
         }
 
-        if matches!(self.peek(), Some('e' | 'E')) {
-            self.bump();
-            if matches!(self.peek(), Some('+' | '-')) {
-                self.bump();
+        if self.match_byte(b'.') {
+            if !matches!(self.peek_byte(), Some(b'0'..=b'9')) {
+                return Err(self.err_at(
+                    "CCML1003",
+                    "invalid number format",
+                    start_line,
+                    start_col,
+                ));
             }
-            if !matches!(self.peek(), Some('0'..='9')) {
-                return Err(self.err_at("CCML1003", "invalid number format", start_line, start_col));
+            while let Some(byte @ b'0'..=b'9') = self.peek_byte() {
+                self.bump_ascii_byte(byte);
             }
-            while matches!(self.peek(), Some('0'..='9')) {
-                self.bump();
+        }
+
+        if let Some(byte @ (b'e' | b'E')) = self.peek_byte() {
+            self.bump_ascii_byte(byte);
+            if let Some(sign @ (b'+' | b'-')) = self.peek_byte() {
+                self.bump_ascii_byte(sign);
+            }
+            if !matches!(self.peek_byte(), Some(b'0'..=b'9')) {
+                return Err(self.err_at(
+                    "CCML1003",
+                    "invalid number format",
+                    start_line,
+                    start_col,
+                ));
+            }
+            while let Some(byte @ b'0'..=b'9') = self.peek_byte() {
+                self.bump_ascii_byte(byte);
             }
         }
 
@@ -345,17 +362,27 @@ impl<'a> Parser<'a> {
     fn skip_ws_and_comments(&mut self) {
         loop {
             let before = self.idx;
-            while let Some(ch) = self.peek() {
-                if ch.is_whitespace() || ch == '\u{feff}' {
-                    self.bump();
-                } else {
+            while let Some(byte) = self.peek_byte() {
+                if byte.is_ascii_whitespace() {
+                    self.bump_ascii_byte(byte);
+                    continue;
+                }
+                if byte < 0x80 {
                     break;
                 }
+                match self.peek() {
+                    Some(ch) if ch.is_whitespace() || ch == '\u{feff}' => self.bump(),
+                    _ => break,
+                }
             }
-            if self.peek() == Some('#') {
-                while let Some(ch) = self.peek() {
-                    self.bump();
-                    if ch == '\n' {
+            if self.peek_byte() == Some(b'#') {
+                while let Some(byte) = self.peek_byte() {
+                    if !byte.is_ascii() {
+                        self.bump();
+                        continue;
+                    }
+                    self.bump_ascii_byte(byte);
+                    if byte == b'\n' {
                         break;
                     }
                 }
@@ -383,8 +410,21 @@ impl<'a> Parser<'a> {
         }
     }
 
+    fn match_byte(&mut self, expected: u8) -> bool {
+        if self.peek_byte() == Some(expected) {
+            self.bump_ascii_byte(expected);
+            true
+        } else {
+            false
+        }
+    }
+
     fn peek(&self) -> Option<char> {
         self.src[self.idx..].chars().next()
+    }
+
+    fn peek_byte(&self) -> Option<u8> {
+        self.src.as_bytes().get(self.idx).copied()
     }
 
     fn bump(&mut self) {
@@ -396,6 +436,17 @@ impl<'a> Parser<'a> {
             } else {
                 self.col += 1;
             }
+        }
+    }
+
+    fn bump_ascii_byte(&mut self, byte: u8) {
+        debug_assert!(byte.is_ascii());
+        self.idx += 1;
+        if byte == b'\n' {
+            self.line += 1;
+            self.col = 1;
+        } else {
+            self.col += 1;
         }
     }
 
@@ -412,8 +463,8 @@ impl<'a> Parser<'a> {
     }
 }
 
-fn is_bare_key_char(ch: char) -> bool {
-    ch.is_ascii_alphanumeric() || ch == '_' || ch == '.' || ch == '-'
+fn is_bare_key_byte(byte: u8) -> bool {
+    byte.is_ascii_alphanumeric() || byte == b'_' || byte == b'.' || byte == b'-'
 }
 
 struct ParsedKey {

@@ -107,14 +107,26 @@ Track independent improvements that are useful but not hard blockers for Week 2 
   - `cargo test --offline -p ccml-cli` passed.
   - `cargo run --offline -p ccml-cli -- conformance ../../tests/conformance` passed.
 
-13. Recovery/playbook doc for offline toolchain execution
+13. [DONE 2026-05-31] Parser ASCII scan micro-optimization
+- Goal: reduce per-character parser overhead in bare key, number, whitespace, and comment scanning.
+- Why independent: parser internal performance cleanup only; syntax, AST, diagnostics contract unchanged.
+- Implementation notes:
+  - Replaced bare-key and number scan loops with byte-based ASCII loops.
+  - Added ASCII whitespace/comment fast paths while preserving Unicode whitespace and BOM handling through the existing char path.
+  - Added a regression test for BOM, Unicode whitespace, and non-ASCII comment handling.
+- Result:
+  - `cargo test --offline -p ccml-core` passed.
+  - `cargo test --offline -p ccml-cli` passed.
+  - `cargo run --offline -p ccml-cli -- conformance ../../tests/conformance` passed.
+
+14. Recovery/playbook doc for offline toolchain execution
 - Goal: document canonical fallback commands for PATH/network mismatch (`cargo --offline`, `uv` usage, ffi build path).
 - Why independent: operational documentation only.
 - Done when:
   - one short runbook exists under `docs/`.
   - commands are copy-pastable and validated at least once.
 
-14. WASM smoke artifact cleanup utility
+15. WASM smoke artifact cleanup utility
 - Goal: add optional cleanup helper for generated `core/rust/target/wasm-smoke` artifacts.
 - Why independent: local workspace hygiene only; build/test semantics unchanged.
 - Done when:

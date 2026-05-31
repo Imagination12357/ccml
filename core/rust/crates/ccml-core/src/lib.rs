@@ -95,6 +95,13 @@ mod tests {
     }
 
     #[test]
+    fn skips_bom_unicode_whitespace_and_non_ascii_comments() {
+        let src = "\u{feff}\u{00a0}a: 1\n# \u{2603}\nb: 2";
+        let json = to_json(src, &ToJsonOptions { pretty: false }).unwrap();
+        assert_eq!(json, "{\"a\":1,\"b\":2}");
+    }
+
+    #[test]
     fn emits_duplicate_key_warning_with_keep_last() {
         let src = "x: 1\nx: 2";
         let json = to_json(src, &ToJsonOptions { pretty: false }).unwrap();
