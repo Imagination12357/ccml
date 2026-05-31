@@ -6,6 +6,7 @@ on:
       - ".github/workflows/ci-gates.yml"
       - "core/rust/**"
       - "bindings/python/**"
+      - "bindings/node/**"
       - "tests/conformance/**"
       - "scripts/ci/**"
   pull_request:
@@ -13,6 +14,7 @@ on:
       - ".github/workflows/ci-gates.yml"
       - "core/rust/**"
       - "bindings/python/**"
+      - "bindings/node/**"
       - "tests/conformance/**"
       - "scripts/ci/**"
   workflow_dispatch:

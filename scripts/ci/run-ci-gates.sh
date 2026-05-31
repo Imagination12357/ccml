@@ -16,17 +16,20 @@ GATE_TIMEOUT_FFI_SECONDS="${GATE_TIMEOUT_FFI_SECONDS:-900}"
 GATE_TIMEOUT_FFI_BUILD_SECONDS="${GATE_TIMEOUT_FFI_BUILD_SECONDS:-600}"
 GATE_TIMEOUT_CONFORMANCE_SECONDS="${GATE_TIMEOUT_CONFORMANCE_SECONDS:-900}"
 GATE_TIMEOUT_PYTHON_SECONDS="${GATE_TIMEOUT_PYTHON_SECONDS:-600}"
+GATE_TIMEOUT_VERSION_SECONDS="${GATE_TIMEOUT_VERSION_SECONDS:-180}"
 
 status_core="pass"
 status_ffi="pass"
 status_ffi_build="pass"
 status_conformance="pass"
 status_python="pass"
+status_version="pass"
 reason_core="ok"
 reason_ffi="ok"
 reason_ffi_build="ok"
 reason_conformance="ok"
 reason_python="ok"
+reason_version="ok"
 
 core_passed=0
 core_failed=0
@@ -36,6 +39,9 @@ conformance_total=0
 conformance_failed=0
 python_passed=0
 python_failed=0
+version_rust="n/a"
+version_python="n/a"
+version_node="n/a"
 
 run_gate() {
   local gate_name="$1"
@@ -109,8 +115,19 @@ else
   python_failed=1
 fi
 
+reason_version="$(run_gate "version_consistency" "$LOG_DIR/version_consistency.log" "$GATE_TIMEOUT_VERSION_SECONDS" bash -lc "cd '$REPO_ROOT' && bash scripts/ci/check-version-consistency.sh")"
+if [[ "$reason_version" != "ok" ]]; then
+  status_version="fail"
+fi
+version_rust="$(grep -E '^rust_version=' "$LOG_DIR/version_consistency.log" | tail -n 1 | cut -d= -f2- || true)"
+version_python="$(grep -E '^python_version=' "$LOG_DIR/version_consistency.log" | tail -n 1 | cut -d= -f2- || true)"
+version_node="$(grep -E '^node_version=' "$LOG_DIR/version_consistency.log" | tail -n 1 | cut -d= -f2- || true)"
+version_rust="${version_rust:-<missing>}"
+version_python="${version_python:-<missing>}"
+version_node="${version_node:-<missing>}"
+
 overall="pass"
-if [[ "$status_core" != "pass" || "$status_ffi" != "pass" || "$status_ffi_build" != "pass" || "$status_conformance" != "pass" || "$status_python" != "pass" ]]; then
+if [[ "$status_core" != "pass" || "$status_ffi" != "pass" || "$status_ffi_build" != "pass" || "$status_conformance" != "pass" || "$status_python" != "pass" || "$status_version" != "pass" ]]; then
   overall="fail"
 fi
 
@@ -131,17 +148,23 @@ cat >"$SUMMARY_PATH" <<EOF
 - python_smoke: ${status_python}
 - python_smoke_passed: ${python_passed}
 - python_smoke_failed: ${python_failed}
+- version_consistency: ${status_version}
+- version_rust: ${version_rust}
+- version_python: ${version_python}
+- version_node: ${version_node}
 - log_dir: ${LOG_DIR}
 - core_log: ${LOG_DIR}/core.log
 - ffi_log: ${LOG_DIR}/ffi.log
 - ffi_build_log: ${LOG_DIR}/ffi_build.log
 - conformance_log: ${LOG_DIR}/conformance.log
 - python_smoke_log: ${LOG_DIR}/python_smoke.log
+- version_consistency_log: ${LOG_DIR}/version_consistency.log
 - core_reason: ${reason_core}
 - ffi_reason: ${reason_ffi}
 - ffi_build_reason: ${reason_ffi_build}
 - conformance_reason: ${reason_conformance}
 - python_smoke_reason: ${reason_python}
+- version_consistency_reason: ${reason_version}
 EOF
 
 {
@@ -171,6 +194,11 @@ EOF
     echo
     echo "### python_smoke (${reason_python})"
     tail_snippet "$LOG_DIR/python_smoke.log"
+  fi
+  if [[ "$status_version" == "fail" ]]; then
+    echo
+    echo "### version_consistency (${reason_version})"
+    tail_snippet "$LOG_DIR/version_consistency.log"
   fi
 } >>"$SUMMARY_PATH"
 

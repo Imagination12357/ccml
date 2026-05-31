@@ -176,10 +176,31 @@
 
 ### Day 2
 - Plan:
+  - Integrate version consistency check into the existing CI gate flow without changing gate semantics.
+  - Keep summary artifact format stable while adding explicit version mismatch visibility.
 - Design:
+  - Add a dedicated `version_consistency` gate in `scripts/ci/run-ci-gates.sh` with its own timeout/log/reason fields.
+  - Parse `rust/python/node` versions from the gate log and emit them in `artifacts/ci/gate-summary.md`.
+  - Extend workflow trigger ownership paths to include `bindings/node/**` so Node version changes are gated.
 - Implement:
+  - Updated CI gate runner:
+    - `scripts/ci/run-ci-gates.sh`
+      - added `GATE_TIMEOUT_VERSION_SECONDS`
+      - added `version_consistency` gate execution
+      - added `version_rust/version_python/version_node` summary fields
+      - added `version_consistency_log` and `version_consistency_reason`
+      - added failed-gate tail section for version consistency
+  - Updated workflow trigger paths:
+    - `.github/workflows/ci-gates.yml`
+      - added `bindings/node/**` to `push.paths` and `pull_request.paths`
 - Validate:
+  - File-level checks passed:
+    - `rg -n "version_consistency|version_rust|version_python|version_node|GATE_TIMEOUT_VERSION_SECONDS|version_consistency_log" scripts/ci/run-ci-gates.sh`
+    - `rg -n "bindings/node/\\*\\*" .github/workflows/ci-gates.yml`
+  - Runtime validation status:
+    - `bash scripts/ci/check-version-consistency.sh` could not run locally because `bash` is unavailable in this Windows environment.
 - Document:
+  - Recorded Day 2 implementation and validation status in this execution log.
 
 ### Day 3
 - Plan:
