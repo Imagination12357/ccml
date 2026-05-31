@@ -204,10 +204,22 @@
 
 ### Day 3
 - Plan:
+  - Produce one cross-platform validation playbook with explicit Windows and bash-platform command sets.
+  - Stabilize local Python smoke execution around repo-local `uv` cache usage.
 - Design:
+  - Keep CI bash path unchanged, and add a Windows PowerShell fallback only for local reproducibility.
+  - Define fallback rules for bash absence, uv cache collisions, and dynamic library load failures.
 - Implement:
+  - Added cross-platform validation playbook:
+    - `docs/cross-platform-validation-playbook.md`
+  - Added Windows version-consistency fallback script:
+    - `scripts/ci/check-version-consistency.ps1`
 - Validate:
+  - `powershell -ExecutionPolicy Bypass -File scripts/ci/check-version-consistency.ps1` -> passed (`0.1.0` aligned)
+  - `powershell -ExecutionPolicy Bypass -File tests/bindings/run-parity-smoke.ps1` -> passed
+  - `Set-Location bindings/python; $env:UV_CACHE_DIR='.uv-cache'; uv run python tests/smoke.py` -> passed
 - Document:
+  - Recorded platform-specific commands, fallbacks, and minimum evidence requirements in playbook.
 
 ### Day 4
 - Plan:
