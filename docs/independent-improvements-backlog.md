@@ -96,14 +96,25 @@ Track independent improvements that are useful but not hard blockers for Week 2 
   - help/usage output is deterministic and tested.
 
 ## Priority C (Low Risk Cleanup)
-12. Recovery/playbook doc for offline toolchain execution
+12. [DONE 2026-05-31] Parser duplicate-key insertion micro-optimization
+- Goal: reduce duplicate key handling overhead without changing `keep-last + warn` behavior.
+- Why independent: parser internal performance cleanup only; syntax, AST, diagnostics contract unchanged.
+- Implementation notes:
+  - Replaced `BTreeMap::contains_key` + `insert` with one `BTreeMap::entry` lookup in `ccml-core` object entry insertion.
+  - Preserved `CCML2001` warning emission and keep-last overwrite behavior.
+- Result:
+  - `cargo test --offline -p ccml-core` passed.
+  - `cargo test --offline -p ccml-cli` passed.
+  - `cargo run --offline -p ccml-cli -- conformance ../../tests/conformance` passed.
+
+13. Recovery/playbook doc for offline toolchain execution
 - Goal: document canonical fallback commands for PATH/network mismatch (`cargo --offline`, `uv` usage, ffi build path).
 - Why independent: operational documentation only.
 - Done when:
   - one short runbook exists under `docs/`.
   - commands are copy-pastable and validated at least once.
 
-13. WASM smoke artifact cleanup utility
+14. WASM smoke artifact cleanup utility
 - Goal: add optional cleanup helper for generated `core/rust/target/wasm-smoke` artifacts.
 - Why independent: local workspace hygiene only; build/test semantics unchanged.
 - Done when:

@@ -1,4 +1,4 @@
-use std::collections::BTreeMap;
+use std::collections::{btree_map::Entry, BTreeMap};
 
 use crate::ast::AstNode;
 use crate::diag::{CcmlError, Diagnostic, Severity};
@@ -48,16 +48,24 @@ impl<'a> Parser<'a> {
         key_col: usize,
         value: AstNode,
     ) {
-        if map.contains_key(&key) {
-            self.diagnostics.push(Diagnostic {
-                code: "CCML2001".to_string(),
-                message: format!("duplicate key '{}' overwritten by keep-last policy", key),
-                line: key_line,
-                column: key_col,
-                severity: Severity::Warning,
-            });
+        match map.entry(key) {
+            Entry::Occupied(mut entry) => {
+                self.diagnostics.push(Diagnostic {
+                    code: "CCML2001".to_string(),
+                    message: format!(
+                        "duplicate key '{}' overwritten by keep-last policy",
+                        entry.key()
+                    ),
+                    line: key_line,
+                    column: key_col,
+                    severity: Severity::Warning,
+                });
+                entry.insert(value);
+            }
+            Entry::Vacant(entry) => {
+                entry.insert(value);
+            }
         }
-        map.insert(key, value);
     }
 
     fn parse_implicit_root_object(&mut self) -> Result<AstNode, CcmlError> {
