@@ -27,6 +27,8 @@ Minimal Week 4 baseline for release-readiness preparation before Week 5 handoff.
 - `node bindings/node/tests/day1-regression.mjs`
 3. WASM runtime smoke path:
 - `bash scripts/wasm/build-and-run-smoke.sh`
+4. WASM smoke summary artifact reports `status: pass`:
+- `artifacts/ci/wasm-smoke-summary.md`
 
 ## 4) CI Gate Visibility
 1. `ci-gates` workflow uploads `artifacts/ci/gate-summary.md`.
@@ -41,6 +43,7 @@ Minimal Week 4 baseline for release-readiness preparation before Week 5 handoff.
 2. Version mismatch across Rust/Python/Node package manifests.
 3. Cross-binding smoke regression (Python/Node parity or Node Day 1 regression).
 4. WASM runtime smoke not reproducible in CI path.
+5. WASM smoke summary missing or reporting `status: fail`.
 
 ## Notes
 1. This checklist is a release-readiness baseline, not full release automation.

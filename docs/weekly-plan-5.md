@@ -223,10 +223,34 @@
 
 ### Day 4
 - Plan:
+  - Promote WASM smoke from basic pass/fail into an actionable release-readiness signal.
+  - Keep local Windows bash absence visible as a validation gap, not a silent pass.
 - Design:
+  - Add a script-generated summary artifact with step, tool versions, bindgen version expectations, output path, and triage guidance.
+  - Upload the summary from the WASM runtime smoke workflow on both pass and fail.
+  - Align release-readiness documents with the new summary signal.
 - Implement:
+  - Updated WASM smoke script:
+    - `scripts/wasm/build-and-run-smoke.sh`
+      - added `artifacts/ci/wasm-smoke-summary.md`
+      - added current-step tracking and failure summary generation
+      - added Rust/Cargo/Node/wasm-bindgen diagnostics
+  - Updated WASM workflow:
+    - `.github/workflows/wasm-runtime-smoke.yml`
+      - added job/step timeouts
+      - uploads `wasm-smoke-summary` artifact with `if: always()`
+  - Updated release-readiness documents:
+    - `docs/wasm-runtime-smoke-notes.md`
+    - `docs/release-readiness-checklist.md`
+    - `docs/pre-release-checklist-week5.md`
 - Validate:
+  - File-level linkage check passed:
+    - `rg -n "wasm-smoke-summary|CURRENT_STEP|write_summary|Triage|status: pass|timeout-minutes" ...`
+  - Runtime validation status:
+    - `bash scripts/wasm/build-and-run-smoke.sh` could not run locally because `bash` is unavailable in this Windows environment.
+    - `node tests/wasm/runtime-smoke.mjs` could not run standalone because generated entry `core/rust/target/wasm-smoke/ccml_wasm.js` is absent until the bash build/package script runs.
 - Document:
+  - Recorded Day 4 signal model, artifact path, triage behavior, and local validation limit in this execution log.
 
 ### Day 5
 - Plan:

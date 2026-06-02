@@ -23,6 +23,7 @@ concurrency:
 jobs:
   smoke:
     runs-on: ubuntu-latest
+    timeout-minutes: 35
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -56,4 +57,12 @@ jobs:
 
       - name: Run WASM runtime smoke
         shell: bash
+        timeout-minutes: 30
         run: bash scripts/wasm/build-and-run-smoke.sh
+
+      - name: Upload WASM smoke summary artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: wasm-smoke-summary
+          path: artifacts/ci/wasm-smoke-summary.md

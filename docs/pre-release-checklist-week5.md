@@ -19,6 +19,7 @@ Final go/no-go checklist before release execution (or release-ready closeout) in
 4. `powershell -ExecutionPolicy Bypass -File tests/bindings/run-parity-smoke.ps1`
 5. `node bindings/node/tests/day1-regression.mjs`
 6. WASM runtime smoke path is green in CI signal set.
+7. WASM smoke summary artifact reports `status: pass`.
 
 ## 3) CI Signal Health
 1. `ci-gates` workflow latest run is green on target branch.
@@ -28,6 +29,7 @@ Final go/no-go checklist before release execution (or release-ready closeout) in
 - log pointers
 - failed-gate snippet section (empty/irrelevant on green runs)
 3. No unresolved flaky failures in the most recent release-candidate runs.
+4. WASM smoke summary artifact is available as `wasm-smoke-summary`.
 
 ## 4) Runtime Contract Confidence
 1. Node memory ownership risk status is explicitly recorded (closed or known residual with acceptance).
