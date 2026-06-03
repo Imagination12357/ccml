@@ -11,6 +11,7 @@ No-Go for immediate `v1.0.0` publishing until the blockers below are closed.
 5. Node Day 1 regression: pass (`300 mixed cycles + large payload + invalid variants`)
 6. Python direct smoke with repo-local uv cache: pass
 7. Windows version consistency fallback: pass (`0.1.0` aligned across Rust/Python/Node)
+8. Root README baseline: present.
 
 ## Blocker Ledger
 1. Release version/tag is not finalized against manifests.
@@ -30,6 +31,10 @@ No-Go for immediate `v1.0.0` publishing until the blockers below are closed.
 - `bindings/node/package.json` currently has `private: true`.
 - Next trigger: decide whether Node is release-scoped for public publish or explicitly excluded from the first release.
 
+5. README release polish is newly added and needs final owner review.
+- Root README now exists and documents status, layout, CLI usage, validation, bindings, and release readiness.
+- Next trigger: final README review before release tag.
+
 ## Go Criteria
 Mark Go only when:
 1. Version/tag decision is finalized.
@@ -38,6 +43,7 @@ Mark Go only when:
 4. `wasm-runtime-smoke` is green on the target branch.
 5. `wasm-smoke-summary` reports `status: pass`.
 6. Node publish scope is explicitly decided.
+7. README release polish is accepted.
 
 ## No-Go Closeout Criteria
 If any blocker remains on Day 7:

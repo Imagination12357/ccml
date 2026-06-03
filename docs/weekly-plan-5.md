@@ -294,6 +294,8 @@
     - `docs/release-runbook-v1.0.0.md`
   - Added go/no-go snapshot and blocker ledger:
     - `docs/release-go-no-go-week5.md`
+  - Added root project README baseline:
+    - `README.md`
 - Validate:
   - `cargo test --offline -p ccml-core` -> 11 passed, 0 failed.
   - `cargo test --offline -p ccml-ffi` -> 9 passed, 0 failed.
@@ -302,6 +304,7 @@
   - `node bindings/node/tests/day1-regression.mjs` -> passed.
   - `powershell -ExecutionPolicy Bypass -File scripts/ci/check-version-consistency.ps1` -> passed (`0.1.0` aligned).
   - `Set-Location bindings/python; $env:UV_CACHE_DIR='.uv-cache'; uv run python tests/smoke.py` -> passed.
+  - `Test-Path README.md` -> true.
 - Document:
   - Recorded release package, validation snapshot, and Day 7 blockers in release-prep documents.
 
