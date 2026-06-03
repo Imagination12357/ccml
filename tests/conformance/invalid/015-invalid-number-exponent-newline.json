@@ -1,0 +1,16 @@
+{
+  "schema_version": "1.0.0",
+  "id": "invalid.number.exponent_newline.015",
+  "category": "invalid",
+  "description": "Invalid exponent number on second line reports the number start.",
+  "input": "a: 1\nb: 1e+\n",
+  "expect": {
+    "status": "error",
+    "error": {
+      "code": "CCML1003",
+      "line": 2,
+      "column": 4,
+      "message_contains": "number"
+    }
+  }
+}

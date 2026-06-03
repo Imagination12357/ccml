@@ -1,0 +1,16 @@
+{
+  "schema_version": "1.0.0",
+  "id": "invalid.missing_value.comment_next_key.014",
+  "category": "invalid",
+  "description": "Missing value after colon when a comment is followed by the next key.",
+  "input": "a: # missing value\nb: 2",
+  "expect": {
+    "status": "error",
+    "error": {
+      "code": "CCML1001",
+      "line": 2,
+      "column": 1,
+      "message_contains": "value"
+    }
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "schema_version": "1.0.0",
+  "id": "warn.duplicate.quoted_bare_comment_array.016",
+  "category": "warn",
+  "description": "Duplicate quoted and bare key around comment keeps array replacement with warning.",
+  "input": "\"a.b\": 1\n# bare duplicate overwrites quoted key\na.b: [true, null]",
+  "expect": {
+    "status": "ok_with_warnings",
+    "output_json": "{\"a.b\":[true,null]}",
+    "warnings": [
+      {
+        "code": "CCML2001",
+        "severity": "warning",
+        "message_contains": "duplicate key"
+      }
+    ]
+  }
+}

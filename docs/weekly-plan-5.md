@@ -254,10 +254,26 @@
 
 ### Day 5
 - Plan:
+  - Expand conformance depth with a small batch only; avoid new parser/spec semantics.
+  - Target invalid diagnostic boundaries and duplicate-key mixed stress cases.
 - Design:
+  - Add 2 invalid cases for comment/newline value boundary and invalid exponent position.
+  - Add 2 warn cases for quoted/bare duplicates and nested/root duplicate stress.
+  - Keep expectations schema-valid and line/column deterministic.
 - Implement:
+  - Added invalid diagnostic-boundary cases:
+    - `tests/conformance/invalid/014-missing-value-comment-next-key.json`
+    - `tests/conformance/invalid/015-invalid-number-exponent-newline.json`
+  - Added duplicate-key mixed stress cases:
+    - `tests/conformance/warn/016-duplicate-quoted-bare-comment-array.json`
+    - `tests/conformance/warn/017-duplicate-nested-and-root-object.json`
+  - Updated conformance index:
+    - `tests/conformance/INDEX.md`
 - Validate:
+  - `cargo run --offline -p ccml-cli -- conformance ../../tests/conformance`
+  - Result: `total=68`, `failed=0`
 - Document:
+  - Recorded Day 5 conformance expansion and validation result in this execution log.
 
 ### Day 6
 - Plan:

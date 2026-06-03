@@ -1,0 +1,18 @@
+{
+  "schema_version": "1.0.0",
+  "id": "warn.duplicate.nested_and_root_object.017",
+  "category": "warn",
+  "description": "Nested duplicate and root duplicate both follow keep-last warning policy.",
+  "input": "root: {k: 1, k: 2}\nroot: {nested: \"x\"}",
+  "expect": {
+    "status": "ok_with_warnings",
+    "output_json": "{\"root\":{\"nested\":\"x\"}}",
+    "warnings": [
+      {
+        "code": "CCML2001",
+        "severity": "warning",
+        "message_contains": "duplicate key"
+      }
+    ]
+  }
+}
