@@ -33,10 +33,10 @@ write_summary() {
 - wasm_entry: ${OUT_DIR}/ccml_wasm.js
 
 ## Triage
-1. If target setup failed, run `rustup target add wasm32-unknown-unknown`.
-2. If package build failed, inspect `ccml-wasm` compile errors under `core/rust`.
-3. If bindgen failed, compare `expected_wasm_bindgen` with `current_wasm_bindgen`.
-4. If runtime smoke failed, inspect `tests/wasm/runtime-smoke.mjs` and generated entry path.
+1. If target setup failed, run 'rustup target add wasm32-unknown-unknown'.
+2. If package build failed, inspect 'ccml-wasm' compile errors under 'core/rust'.
+3. If bindgen failed, compare 'expected_wasm_bindgen' with 'current_wasm_bindgen'.
+4. If runtime smoke failed, inspect 'tests/wasm/runtime-smoke.mjs' and generated entry path.
 EOF
 }
 

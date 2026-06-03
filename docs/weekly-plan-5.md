@@ -249,6 +249,8 @@
   - Runtime validation status:
     - `bash scripts/wasm/build-and-run-smoke.sh` could not run locally because `bash` is unavailable in this Windows environment.
     - `node tests/wasm/runtime-smoke.mjs` could not run standalone because generated entry `core/rust/target/wasm-smoke/ccml_wasm.js` is absent until the bash build/package script runs.
+  - Follow-up fix:
+    - Replaced Markdown backticks inside the script-generated heredoc summary with single quotes after CI reported command substitution attempts while writing `wasm-smoke-summary.md`.
 - Document:
   - Recorded Day 4 signal model, artifact path, triage behavior, and local validation limit in this execution log.
 
