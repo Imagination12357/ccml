@@ -279,10 +279,31 @@
 
 ### Day 6
 - Plan:
+  - Prepare release execution package without forcing a premature publish decision.
+  - Separate local green gate evidence from CI/WASM evidence that must be confirmed on target branch.
 - Design:
+  - Use three release-prep artifacts:
+    - release notes draft
+    - release runbook
+    - go/no-go snapshot with blocker ledger
+  - Treat current `0.1.0` manifest alignment vs planned `v1.0.0` target as an explicit Day 7 decision blocker.
 - Implement:
+  - Added release notes draft:
+    - `docs/release-notes-v1.0.0-draft.md`
+  - Added release runbook draft:
+    - `docs/release-runbook-v1.0.0.md`
+  - Added go/no-go snapshot and blocker ledger:
+    - `docs/release-go-no-go-week5.md`
 - Validate:
+  - `cargo test --offline -p ccml-core` -> 11 passed, 0 failed.
+  - `cargo test --offline -p ccml-ffi` -> 9 passed, 0 failed.
+  - `cargo run --offline -p ccml-cli -- conformance ../../tests/conformance` -> `total=68`, `failed=0`.
+  - `powershell -ExecutionPolicy Bypass -File tests/bindings/run-parity-smoke.ps1` -> passed.
+  - `node bindings/node/tests/day1-regression.mjs` -> passed.
+  - `powershell -ExecutionPolicy Bypass -File scripts/ci/check-version-consistency.ps1` -> passed (`0.1.0` aligned).
+  - `Set-Location bindings/python; $env:UV_CACHE_DIR='.uv-cache'; uv run python tests/smoke.py` -> passed.
 - Document:
+  - Recorded release package, validation snapshot, and Day 7 blockers in release-prep documents.
 
 ### Day 7
 - Plan:
