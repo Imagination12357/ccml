@@ -1,7 +1,6 @@
 {
   "name": "ccml-node",
-  "version": "0.1.0",
-  "private": true,
+  "version": "1.0.0",
   "type": "module",
   "description": "CCML Node phase-1 binding skeleton over ccml-ffi",
   "scripts": {

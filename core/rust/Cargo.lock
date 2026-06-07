@@ -78,7 +78,7 @@ checksum = "175812e0be2bccb6abe50bb8d566126198344f707e304f45c648fd8f2cc0365e"
 
 [[package]]
 name = "ccml-cli"
-version = "0.1.0"
+version = "1.0.0"
 dependencies = [
  "ccml-core",
  "jsonschema",
@@ -88,11 +88,11 @@ dependencies = [
 
 [[package]]
 name = "ccml-core"
-version = "0.1.0"
+version = "1.0.0"
 
 [[package]]
 name = "ccml-ffi"
-version = "0.1.0"
+version = "1.0.0"
 dependencies = [
  "ccml-core",
  "jsonschema",
@@ -101,7 +101,7 @@ dependencies = [
 
 [[package]]
 name = "ccml-wasm"
-version = "0.1.0"
+version = "1.0.0"
 dependencies = [
  "ccml-core",
  "wasm-bindgen",

@@ -54,8 +54,8 @@ Define the release execution order and fallback actions for the planned `v1.0.0`
 3. If Python publish fails after Rust publish:
 - stop Node publish.
 - document partial release state and next trigger.
-4. If Node publish is blocked by `private: true`:
-- treat as release metadata blocker unless Node is explicitly scoped out.
+4. If Node publish metadata fails validation:
+- stop release and document the npm metadata error before retrying.
 5. If WASM smoke fails:
 - do not publish `v1.0.0`.
 - inspect `artifacts/ci/wasm-smoke-summary.md` first.

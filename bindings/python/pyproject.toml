@@ -1,6 +1,6 @@
 [project]
 name = "ccml-py"
-version = "0.1.0"
+version = "1.0.0"
 description = "Thin Python adapter for ccml-ffi"
 requires-python = ">=3.11"
 dependencies = []

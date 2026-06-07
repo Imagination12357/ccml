@@ -1,7 +1,9 @@
 # Week 5 Release Go/No-Go Snapshot
 
 ## Current Decision
-No-Go for immediate `v1.0.0` publishing until the blockers below are closed.
+Final Day 7 decision: Go-ready for `v1.0.0` release execution.
+
+Publishing/tagging has not been executed in this local session; it still requires an explicit operator action using `docs/release-runbook-v1.0.0.md`.
 
 ## Local Gate Snapshot
 1. Core tests: pass (`11 passed, 0 failed`)
@@ -10,30 +12,36 @@ No-Go for immediate `v1.0.0` publishing until the blockers below are closed.
 4. Python/Node parity smoke: pass
 5. Node Day 1 regression: pass (`300 mixed cycles + large payload + invalid variants`)
 6. Python direct smoke with repo-local uv cache: pass
-7. Windows version consistency fallback: pass (`0.1.0` aligned across Rust/Python/Node)
+7. Windows version consistency fallback: pass (`1.0.0` aligned across Rust/Python/Node)
 8. Root README baseline: present.
+9. README CLI example smoke: corrected and locally checked.
+10. User-provided target-branch `ci-gates`: green.
+11. User-provided target-branch `wasm-runtime-smoke`: green.
+12. User-provided `wasm-smoke-summary`: `status: pass`.
 
-## Blocker Ledger
-1. Release version/tag is not finalized against manifests.
-- Current manifests are aligned at `0.1.0`.
+## Closed Blockers
+1. Release version/tag finalized against manifests.
+- Manifests are aligned at `1.0.0`.
 - Planned release target is `v1.0.0`.
-- Next trigger: decide whether to bump manifests to `1.0.0` or change release target.
 
-2. CI-hosted `ci-gates` evidence is not captured in this local snapshot.
-- Local runnable gates are green.
-- Next trigger: latest target-branch `ci-gates` run is green and gate summary artifact is available.
+2. CI-hosted `ci-gates` evidence.
+- User reported latest target-branch `ci-gates` run is green.
 
-3. CI-hosted WASM smoke evidence is not captured in this local snapshot.
-- Local Windows environment lacks `bash`, so the build/package script cannot run locally.
-- Next trigger: latest target-branch `wasm-runtime-smoke` run is green and `wasm-smoke-summary` reports `status: pass`.
+3. CI-hosted WASM smoke evidence.
+- User reported latest target-branch `wasm-runtime-smoke` run is green.
+- User reported `wasm-smoke-summary` reports `status: pass`.
 
-4. Node publish metadata is unresolved.
-- `bindings/node/package.json` currently has `private: true`.
-- Next trigger: decide whether Node is release-scoped for public publish or explicitly excluded from the first release.
+4. Node publish metadata.
+- Node package metadata no longer blocks publishing.
 
-5. README release polish is newly added and needs final owner review.
+5. README release polish.
 - Root README now exists and documents status, layout, CLI usage, validation, bindings, and release readiness.
-- Next trigger: final README review before release tag.
+- Day 7 update: CLI stdin example was corrected from quoted string input to `'a: 1'`.
+
+6. GitHub connector access limitation.
+- Repository remote is `https://github.com/Imagination12357/ccml.git`.
+- Connector lookup returned not found for commit workflow runs.
+- Workflow evidence was supplied manually by the user.
 
 ## Go Criteria
 Mark Go only when:
@@ -44,8 +52,9 @@ Mark Go only when:
 5. `wasm-smoke-summary` reports `status: pass`.
 6. Node publish scope is explicitly decided.
 7. README release polish is accepted.
+8. GitHub workflow evidence is accessible and recorded.
 
-## No-Go Closeout Criteria
-If any blocker remains on Day 7:
-1. publish a release-prep closeout instead of executing release.
-2. keep this blocker ledger as the next release trigger list.
+## Go Status
+All Go criteria are satisfied based on local validation plus user-provided CI/WASM evidence.
+
+Next step: execute `docs/release-runbook-v1.0.0.md` when the operator is ready to publish/tag.

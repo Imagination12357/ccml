@@ -215,7 +215,7 @@
   - Added Windows version-consistency fallback script:
     - `scripts/ci/check-version-consistency.ps1`
 - Validate:
-  - `powershell -ExecutionPolicy Bypass -File scripts/ci/check-version-consistency.ps1` -> passed (`0.1.0` aligned)
+  - `powershell -ExecutionPolicy Bypass -File scripts/ci/check-version-consistency.ps1` -> passed at the then-current manifest version.
   - `powershell -ExecutionPolicy Bypass -File tests/bindings/run-parity-smoke.ps1` -> passed
   - `Set-Location bindings/python; $env:UV_CACHE_DIR='.uv-cache'; uv run python tests/smoke.py` -> passed
 - Document:
@@ -286,7 +286,7 @@
     - release notes draft
     - release runbook
     - go/no-go snapshot with blocker ledger
-  - Treat current `0.1.0` manifest alignment vs planned `v1.0.0` target as an explicit Day 7 decision blocker.
+  - Treat manifest alignment vs planned `v1.0.0` target as an explicit Day 7 decision point.
 - Implement:
   - Added release notes draft:
     - `docs/release-notes-v1.0.0-draft.md`
@@ -302,7 +302,7 @@
   - `cargo run --offline -p ccml-cli -- conformance ../../tests/conformance` -> `total=68`, `failed=0`.
   - `powershell -ExecutionPolicy Bypass -File tests/bindings/run-parity-smoke.ps1` -> passed.
   - `node bindings/node/tests/day1-regression.mjs` -> passed.
-  - `powershell -ExecutionPolicy Bypass -File scripts/ci/check-version-consistency.ps1` -> passed (`0.1.0` aligned).
+  - `powershell -ExecutionPolicy Bypass -File scripts/ci/check-version-consistency.ps1` -> passed at the then-current manifest version.
   - `Set-Location bindings/python; $env:UV_CACHE_DIR='.uv-cache'; uv run python tests/smoke.py` -> passed.
   - `Test-Path README.md` -> true.
 - Document:
@@ -310,7 +310,34 @@
 
 ### Day 7
 - Plan:
+  - Apply go/no-go criteria using current local gates plus available remote evidence.
+  - Do not publish while release blockers remain.
 - Design:
+  - Close Week 5 as release-prep complete if any blocker remains.
+  - Record green local evidence separately from missing CI/WASM evidence.
 - Implement:
+  - Added Week 5 review summary:
+    - `docs/week5-review-summary.md`
+  - Added release-prep closeout:
+    - `docs/release-prep-closeout-week5.md`
+  - Updated go/no-go ledger:
+    - `docs/release-go-no-go-week5.md`
+  - Corrected README CLI stdin example:
+    - `README.md`
 - Validate:
+  - `cargo test --offline -p ccml-core` -> 11 passed, 0 failed.
+  - `cargo test --offline -p ccml-ffi` -> 9 passed, 0 failed.
+  - `cargo run --offline -p ccml-cli -- conformance ../../tests/conformance` -> `total=68`, `failed=0`.
+  - `powershell -ExecutionPolicy Bypass -File tests/bindings/run-parity-smoke.ps1` -> passed.
+  - `node bindings/node/tests/day1-regression.mjs` -> passed.
+  - `powershell -ExecutionPolicy Bypass -File scripts/ci/check-version-consistency.ps1` -> passed (`1.0.0` aligned).
+  - `Set-Location bindings/python; $env:UV_CACHE_DIR='.uv-cache'; uv run python tests/smoke.py` -> passed.
+  - `bash scripts/ci/check-version-consistency.sh` -> unavailable locally (`bash` missing).
+  - `bash scripts/wasm/build-and-run-smoke.sh` -> unavailable locally (`bash` missing).
+  - GitHub connector workflow-run lookup for `Imagination12357/ccml` -> not accessible (`404 Not Found`).
 - Document:
+  - Follow-up update:
+    - bumped Rust/Python/Node manifests and lockfiles to `1.0.0`
+    - removed the Node publish metadata blocker
+    - accepted user-provided evidence: `ci-gates` green, `wasm-runtime-smoke` green, `wasm-smoke-summary status: pass`
+  - Final decision: Go-ready for `v1.0.0` release execution; publish/tag execution still requires an explicit operator action.

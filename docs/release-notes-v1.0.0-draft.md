@@ -29,18 +29,17 @@ Current local snapshot:
 3. `cargo run --offline -p ccml-cli -- conformance ../../tests/conformance` -> total=68, failed=0.
 4. `powershell -ExecutionPolicy Bypass -File tests/bindings/run-parity-smoke.ps1` -> passed.
 5. `node bindings/node/tests/day1-regression.mjs` -> passed (`300 mixed cycles + large payload + invalid variants`).
-6. `powershell -ExecutionPolicy Bypass -File scripts/ci/check-version-consistency.ps1` -> Rust/Python/Node all `0.1.0`.
+6. `powershell -ExecutionPolicy Bypass -File scripts/ci/check-version-consistency.ps1` -> Rust/Python/Node all `1.0.0`.
 7. `Set-Location bindings/python; $env:UV_CACHE_DIR='.uv-cache'; uv run python tests/smoke.py` -> passed.
 
-Pending CI-hosted validation:
-1. `ci-gates` latest target-branch run.
-2. `wasm-runtime-smoke` latest target-branch run.
-3. `artifacts/ci/wasm-smoke-summary.md` with `status: pass`.
+CI-hosted validation:
+1. `ci-gates` latest target-branch run -> green (user-provided evidence).
+2. `wasm-runtime-smoke` latest target-branch run -> green (user-provided evidence).
+3. `artifacts/ci/wasm-smoke-summary.md` -> `status: pass` (user-provided evidence).
 
 ## Known Limitations
 1. Local Windows environment does not provide `bash`, so bash-only CI scripts and WASM package build are CI/Linux validated.
-2. Node package is currently `private: true`; public npm release requires an explicit package metadata decision.
-3. Release target is planned as `v1.0.0`, while current package manifests are aligned at `0.1.0`; version bump/sign-off remains required before publishing `v1.0.0`.
+2. Publish/tag execution has not been run from this local session.
 
 ## Release Decision
-Release only after `docs/release-go-no-go-week5.md` is marked Go.
+`docs/release-go-no-go-week5.md` is marked Go-ready. Publish/tag execution still requires an explicit operator action.

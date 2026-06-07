@@ -12,7 +12,7 @@ pub enum CcmlStatus {
     InternalError = 255,
 }
 
-const VERSION: &str = "0.1.0";
+const VERSION: &str = "1.0.0";
 
 #[unsafe(no_mangle)]
 pub extern "C" fn ccml_to_json(

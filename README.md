@@ -12,7 +12,7 @@ JSON compatibility is strict: every CCML document must map to one valid JSON val
 ## Status
 This repository is in Week 5 release-preparation for the Rust-core rebuild.
 
-Current package manifests are aligned at `0.1.0`. The planned release target is `v1.0.0`, but publishing is gated by `docs/release-go-no-go-week5.md`.
+Current package manifests are aligned at `1.0.0`. The planned release target is `v1.0.0`, and release execution is gated by `docs/release-go-no-go-week5.md`.
 
 ## What CCML Adds
 CCML keeps the JSON data model while adding a smaller config-oriented syntax:
@@ -74,7 +74,7 @@ cargo build --offline -p ccml-cli
 Transcode CCML from stdin:
 
 ```powershell
-'"a: 1" | cargo run --offline -p ccml-cli
+'a: 1' | cargo run --offline -p ccml-cli
 ```
 
 Run conformance vectors:
@@ -139,7 +139,7 @@ Release-prep documents:
 3. [docs/release-notes-v1.0.0-draft.md](docs/release-notes-v1.0.0-draft.md)
 4. [docs/release-runbook-v1.0.0.md](docs/release-runbook-v1.0.0.md)
 
-Current release state is No-Go until the blockers in `docs/release-go-no-go-week5.md` are closed.
+Current release state is Go-ready according to `docs/release-go-no-go-week5.md`; publish/tag execution still requires an explicit operator action.
 
 ## Contributing
 Contributions must preserve the project principles in [CONTRIBUTING.md](CONTRIBUTING.md). JSON compatibility is non-negotiable.
