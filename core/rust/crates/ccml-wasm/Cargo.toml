@@ -2,10 +2,13 @@
 name = "ccml-wasm"
 version = "1.0.0"
 edition = "2024"
+description = "WASM bridge for the CCML Rust core."
+license = "Apache-2.0"
+repository = "https://github.com/Imagination12357/ccml"
 
 [lib]
 crate-type = ["cdylib", "rlib"]
 
 [dependencies]
-ccml-core = { path = "../ccml-core" }
+ccml-core = { path = "../ccml-core", version = "1.0.0" }
 wasm-bindgen = "0.2"

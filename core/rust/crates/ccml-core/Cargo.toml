@@ -2,5 +2,8 @@
 name = "ccml-core"
 version = "1.0.0"
 edition = "2024"
+description = "Core parser and JSON conversion library for CCML."
+license = "Apache-2.0"
+repository = "https://github.com/Imagination12357/ccml"
 
 [dependencies]

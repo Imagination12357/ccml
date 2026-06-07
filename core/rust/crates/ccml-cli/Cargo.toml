@@ -2,9 +2,12 @@
 name = "ccml-cli"
 version = "1.0.0"
 edition = "2024"
+description = "Command-line validation and conformance runner for CCML."
+license = "Apache-2.0"
+repository = "https://github.com/Imagination12357/ccml"
 
 [dependencies]
-ccml-core = { path = "../ccml-core" }
+ccml-core = { path = "../ccml-core", version = "1.0.0" }
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 jsonschema = { version = "0.18", default-features = false, features = ["draft202012"] }
