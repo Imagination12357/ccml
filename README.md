@@ -9,6 +9,51 @@ Project principles:
 
 JSON compatibility is strict: every CCML document must map to one valid JSON value, and features that cannot map cleanly to JSON are out of scope for 1.0.
 
+## Why CCML?
+CCML exists for configuration files that should be easier to write than JSON without becoming a separate data model.
+
+Its design is governed by 3C, also documented in [CONTRIBUTING.md](CONTRIBUTING.md) and [PROJECT_CHARTER.md](PROJECT_CHARTER.md):
+1. Convenient to humans: less punctuation, comments, and readable key/value files.
+2. Compatible with JSON: every valid CCML document maps to one valid JSON value.
+3. Clear to parsers: syntax choices must stay deterministic and easy to diagnose.
+
+The practical advantages are:
+1. You can write common config shapes with less visual noise than JSON.
+2. You can keep JSON as the interchange, storage, and tooling boundary.
+3. You can reject ambiguous convenience features before they become parser edge cases.
+4. You can use one semantic core across CLI, FFI, Python, Node, and WASM bindings.
+
+See [spec/decisions/0002-open-decisions-3c.md](spec/decisions/0002-open-decisions-3c.md) for examples of how syntax decisions are evaluated against 3C.
+
+## Difference With JSON
+CCML keeps the JSON data model, but changes the authoring syntax for configuration use.
+
+| Dimension | JSON | CCML |
+| --- | --- | --- |
+| Primary role | Universal data interchange format | Human-authored configuration syntax that transcodes to JSON |
+| Data model | Objects, arrays, strings, numbers, booleans, null | Same JSON data model only |
+| Top-level object config | Requires `{}` | Allows implicit top-level object for key/value documents |
+| Comments | Not allowed | `#` line comments are allowed |
+| Separators | Commas required | Whitespace is the default separator; commas remain available when the author wants explicit intent or visual grouping |
+| Keys | Quoted strings required | Bare keys allowed when parser-safe; quoted keys remain available |
+| Compatibility boundary | Already JSON | Must transcode to valid JSON |
+| Parser goal | Standardized strict format | Convenient syntax with explicit diagnostics and JSON-compatible output |
+
+The detailed syntax contract is in [spec/ccml-1.0-draft.md](spec/ccml-1.0-draft.md), and shared expected behavior is captured in [tests/conformance](tests/conformance).
+
+## Difference With Other Languages
+This comparison is about design goals, not a complete feature matrix.
+
+| Language | Main orientation | Difference from CCML |
+| --- | --- | --- |
+| HJSON | Human-friendly JSON-like documents | HJSON looks syntactically similar, but it is primarily a relaxed authoring format. CCML is stricter about the [3C boundary](spec/decisions/0002-open-decisions-3c.md): convenience is allowed only when the result remains JSON-compatible and parser-clear. |
+| YAML | Broad human-readable serialization | YAML is feature-rich and can encode many shapes and conventions beyond JSON-style config. CCML intentionally avoids a broad type system and keeps JSON as the semantic boundary. |
+| TOML | Typed application configuration | TOML has its own table-oriented structure and type conventions. CCML keeps object/array structure close to JSON so transcoding remains direct. |
+| JSON5 | JavaScript-friendly JSON extension | JSON5 relaxes JSON syntax using JavaScript-like affordances. CCML instead targets config files with parser clarity and a strict JSON transcode contract. |
+| INI | Simple section/key configuration | INI is small but underspecified across implementations. CCML aims for machine-readable conformance and nested JSON-compatible data. |
+
+The closest-looking alternative is HJSON. The important distinction is intent: CCML is not "JSON with every convenient relaxation." It is a 3C-constrained configuration language where each syntax feature must justify itself across human convenience, JSON compatibility, and parser clarity. The current release scope and exclusions are tracked in [spec/ccml-1.0-draft.md](spec/ccml-1.0-draft.md) and [docs/release-go-no-go-week5.md](docs/release-go-no-go-week5.md).
+
 ## Status
 This repository is in Week 5 release-preparation for the Rust-core rebuild.
 
@@ -37,7 +82,7 @@ Transcoded JSON:
 ## Core Semantics
 1. Top-level object braces are optional for key/value documents.
 2. Comments start with `#` and continue to end of line.
-3. Commas are optional separators where whitespace is unambiguous.
+3. Whitespace is the default separator; commas are optional when the author wants explicit intent or visual grouping.
 4. Bare keys match `[A-Za-z0-9_.-]+`, except punctuation-only keys such as `.` or `--`.
 5. Quoted keys are required for spaces or reserved separators.
 6. Duplicate object keys use keep-last semantics and emit warning `CCML2001`.
