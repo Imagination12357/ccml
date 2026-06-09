@@ -1,7 +1,7 @@
-# CCML FFI Phase 1 Interface Draft (Week 2 Day 1)
+# CCML FFI Phase 1 Interface
 
 ## 1. Goal
-Freeze the C ABI boundary for initial binding kickoff (Python/Node/WASM-adjacent tooling).
+Define the phase-1 C ABI boundary for Python, Node, WASM-adjacent tooling, and other non-Rust callers.
 
 ## 2. Function Signatures (Frozen for Phase 1)
 
@@ -51,8 +51,8 @@ void ccml_free(char* ptr);
 ```
 
 Notes:
-- Day 1 skeleton returns `InternalError` for unimplemented conversion/diagnose paths.
-- Day 2 maps parser and UTF-8 errors to frozen status codes.
+- Parser and UTF-8 failures map to the frozen status codes above.
+- `InternalError` is reserved for unexpected implementation failures.
 
 ## 5. cbindgen Workflow
 Configuration file:
@@ -64,9 +64,8 @@ Header generation command (from repository root):
 cbindgen core/rust/crates/ccml-ffi --config core/rust/crates/ccml-ffi/cbindgen.toml --output core/rust/crates/ccml-ffi/include/ccml_ffi.h
 ```
 
-## 6. Day 1 Scope Completion
-1. Function signatures fixed.
-2. Return code set fixed.
-3. Memory ownership rules fixed.
-4. `cbindgen` config drafted.
-5. `ccml-ffi` compile-ready skeleton implemented.
+## 6. Contract Scope
+1. Function signatures are fixed for phase 1.
+2. Return code set is fixed for phase 1.
+3. Memory ownership rules are fixed for phase 1.
+4. Header generation uses the repository `cbindgen` config.

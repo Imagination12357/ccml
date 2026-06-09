@@ -103,10 +103,11 @@ tests/conformance/      shared machine-readable conformance vectors
 tests/bindings/         cross-binding parity fixtures
 tests/wasm/             WASM runtime smoke
 docs/                   architecture, plans, release-readiness notes
-spec/                   CCML draft spec and decisions
+spec/                   CCML language spec, interface contracts, and decisions
 ```
 
 Architecture overview: [docs/architecture.md](docs/architecture.md).
+FFI interface contract: [spec/interfaces/ffi-phase1-interface.md](spec/interfaces/ffi-phase1-interface.md).
 
 ## CLI Usage
 Build the CLI:

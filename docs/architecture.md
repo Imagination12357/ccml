@@ -17,6 +17,7 @@ Program -> Services -> Feature Groups -> Files
   - Own language spec, error code catalog, conformance contract
 - Output:
   - `spec/ccml-1.0-draft.md`
+  - interface contracts under `spec/interfaces/`
   - decision records under `spec/decisions/`
 - Dependency:
   - none
