@@ -8,9 +8,41 @@ function repoRoot() {
   return path.resolve(here, "../../../");
 }
 
+function packageRoot() {
+  const here = fileURLToPath(new URL(".", import.meta.url));
+  return path.resolve(here, "../");
+}
+
+function platformTag() {
+  const archAliases = {
+    x64: "x64",
+    arm64: "arm64"
+  };
+  return `${process.platform}-${archAliases[process.arch] ?? process.arch}`;
+}
+
+function libraryNames() {
+  if (process.platform === "win32") {
+    return ["ccml_ffi.dll"];
+  }
+  if (process.platform === "darwin") {
+    return ["libccml_ffi.dylib"];
+  }
+  return ["libccml_ffi.so"];
+}
+
+function packageLibraryCandidates() {
+  const native = path.join(packageRoot(), "native");
+  return [
+    ...libraryNames().map((name) => path.join(native, platformTag(), name)),
+    ...libraryNames().map((name) => path.join(native, name))
+  ];
+}
+
 function candidateLibraries() {
   const target = path.join(repoRoot(), "core", "rust", "target");
   return [
+    ...packageLibraryCandidates(),
     path.join(target, "debug", "ccml_ffi.dll"),
     path.join(target, "release", "ccml_ffi.dll"),
     path.join(target, "debug", "libccml_ffi.so"),
@@ -38,7 +70,7 @@ export function resolveLibraryPath() {
   throw new Error(
     [
       "Could not find ccml-ffi dynamic library.",
-      "Build it first (e.g. `cargo build -p ccml-ffi`) or set CCML_FFI_LIB.",
+      "Install a package with a bundled native library, build it first (e.g. `cargo build -p ccml-ffi`), or set CCML_FFI_LIB.",
       "Looked in:",
       ...candidateLibraries().map((p) => `- ${p}`)
     ].join("\n")

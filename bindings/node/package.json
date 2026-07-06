@@ -3,6 +3,14 @@
   "version": "1.0.0",
   "type": "module",
   "description": "CCML Node phase-1 binding skeleton over ccml-ffi",
+  "main": "./src/index.js",
+  "exports": {
+    ".": "./src/index.js"
+  },
+  "files": [
+    "src",
+    "native"
+  ],
   "scripts": {
     "smoke:day1": "node tests/day1-smoke.mjs",
     "smoke:day2": "node tests/day2-smoke.mjs",

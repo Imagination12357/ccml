@@ -3,6 +3,8 @@ from __future__ import annotations
 import ctypes
 import json
 import os
+import platform
+import sys
 from pathlib import Path
 from typing import Any
 
@@ -22,10 +24,46 @@ def _repo_root() -> Path:
     return Path(__file__).resolve().parents[4]
 
 
+def _platform_tag() -> str:
+    system = sys.platform
+    if system.startswith("win"):
+        os_name = "win32"
+    elif system == "darwin":
+        os_name = "darwin"
+    elif system.startswith("linux"):
+        os_name = "linux"
+    else:
+        os_name = system
+
+    machine = platform.machine().lower()
+    arch_aliases = {
+        "amd64": "x64",
+        "x86_64": "x64",
+        "aarch64": "arm64",
+        "arm64": "arm64",
+    }
+    arch = arch_aliases.get(machine, machine)
+    return f"{os_name}-{arch}"
+
+
+def _library_names() -> list[str]:
+    if sys.platform.startswith("win"):
+        return ["ccml_ffi.dll"]
+    if sys.platform == "darwin":
+        return ["libccml_ffi.dylib"]
+    return ["libccml_ffi.so"]
+
+
+def _package_library_candidates() -> list[Path]:
+    native_dir = Path(__file__).resolve().parent / "native"
+    platform_dir = native_dir / _platform_tag()
+    return [platform_dir / name for name in _library_names()] + [native_dir / name for name in _library_names()]
+
+
 def _default_library_candidates() -> list[Path]:
     root = _repo_root()
     target = root / "core" / "rust" / "target"
-    return [
+    source_candidates = [
         target / "debug" / "ccml_ffi.dll",
         target / "release" / "ccml_ffi.dll",
         target / "debug" / "libccml_ffi.so",
@@ -33,6 +71,7 @@ def _default_library_candidates() -> list[Path]:
         target / "debug" / "libccml_ffi.dylib",
         target / "release" / "libccml_ffi.dylib",
     ]
+    return _package_library_candidates() + source_candidates
 
 
 def _load_library() -> ctypes.CDLL:
@@ -50,7 +89,8 @@ def _load_library() -> ctypes.CDLL:
     looked = "\n".join(str(p) for p in _default_library_candidates())
     raise FileNotFoundError(
         "Could not find ccml-ffi dynamic library. "
-        "Build it first (e.g. cargo build -p ccml-ffi) or set CCML_FFI_LIB.\n"
+        "Install a package with a bundled native library, build it first "
+        "(e.g. cargo build -p ccml-ffi), or set CCML_FFI_LIB.\n"
         f"Looked in:\n{looked}"
     )
 
