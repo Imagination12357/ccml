@@ -9,6 +9,130 @@ Project principles:
 
 JSON compatibility is strict: every CCML document must map to one valid JSON value, and features that cannot map cleanly to JSON are out of scope for 1.0.
 
+## Quick Start
+Use this section if you want to try CCML first. The design background starts at [Why CCML?](#why-ccml).
+
+### 1. Try CCML Syntax
+Create a small CCML document:
+
+```ccml
+# comments are allowed
+name: "Ada"
+enabled: true
+limits: {
+  retries: 3
+  timeout_ms: 1000
+}
+tags: ["alpha", "beta"]
+```
+
+It transcodes to one JSON value:
+
+```json
+{"enabled":true,"limits":{"retries":3,"timeout_ms":1000},"name":"Ada","tags":["alpha","beta"]}
+```
+
+### 2. Use the CLI
+After the `v1.0.0` crates.io publish:
+
+```powershell
+cargo install ccml-cli
+'answer: 42' | ccml-cli
+```
+
+From a source checkout:
+
+```powershell
+Set-Location core\rust
+'answer: 42' | cargo run --offline -p ccml-cli
+```
+
+Output:
+
+```json
+{
+  "answer": 42
+}
+```
+
+Run the shared conformance vectors from source:
+
+```powershell
+Set-Location core\rust
+cargo run --offline -p ccml-cli -- conformance ..\..\tests\conformance
+```
+
+### 3. Use Rust
+After the `v1.0.0` crates.io publish:
+
+```toml
+[dependencies]
+ccml-core = "1.0.0"
+```
+
+Inside this repository's Rust workspace:
+
+```toml
+[dependencies]
+ccml-core = { path = "core/rust/crates/ccml-core" }
+```
+
+Example:
+
+```rust
+use ccml_core::{to_json, ToJsonOptions};
+
+fn main() -> Result<(), ccml_core::CcmlError> {
+    let input = "name: \"Ada\"\nenabled: true";
+    let json = to_json(input, &ToJsonOptions { pretty: false })?;
+    assert_eq!(json, "{\"enabled\":true,\"name\":\"Ada\"}");
+    Ok(())
+}
+```
+
+### 4. Use Python
+After the `v1.0.0` PyPI publish:
+
+```powershell
+pip install ccml-py
+python -c "from ccml_py import to_json; print(to_json('answer: 42'))"
+```
+
+From a source checkout:
+
+```powershell
+Set-Location core\rust
+cargo build --offline -p ccml-ffi
+Set-Location ..\..\bindings\python
+$env:UV_CACHE_DIR = ".uv-cache"
+uv run python -c "from ccml_py import to_json; print(to_json('answer: 42'))"
+```
+
+`ccml-py` loads the bundled prebuilt `ccml-ffi` library when the installed wheel includes one for your platform. If you are using an unsupported platform or a custom native build, set `CCML_FFI_LIB` to the built library path.
+
+### 5. Use Node.js
+After the `v1.0.0` npm publish:
+
+```powershell
+npm install ccml-node
+node --input-type=module -e "const { createCcmlFfi } = await import('ccml-node'); const ffi = await createCcmlFfi(); console.log(ffi.toJson('answer: 42'));"
+```
+
+From a source checkout:
+
+```powershell
+Set-Location core\rust
+cargo build --offline -p ccml-ffi
+Set-Location ..\..\bindings\node
+npm install
+node --input-type=module -e "const { createCcmlFfi } = await import('./src/index.js'); const ffi = await createCcmlFfi(); console.log(ffi.toJson('answer: 42'));"
+```
+
+`ccml-node` loads the bundled prebuilt `ccml-ffi` library when the installed package includes one for your platform. If you are using an unsupported platform or a custom native build, set `CCML_FFI_LIB` to the built library path.
+
+### 6. Use the C ABI
+The C ABI is the stable boundary used by Python and Node bindings. See [spec/interfaces/ffi-phase1-interface.md](spec/interfaces/ffi-phase1-interface.md) for function signatures, status codes, memory ownership, and error payload rules.
+
 ## Why CCML?
 CCML exists for configuration files that should be easier to write than JSON without becoming a separate data model.
 
