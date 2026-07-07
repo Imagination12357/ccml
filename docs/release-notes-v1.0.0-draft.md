@@ -12,7 +12,14 @@ Included surfaces:
 3. `ccml-ffi` C ABI boundary
 4. Python thin adapter over `ccml-ffi`
 5. Node thin adapter over `ccml-ffi`
-6. WASM runtime smoke path
+
+Release-readiness signals, not `v1.0.0` package publish targets:
+1. WASM runtime smoke path
+2. `artifacts/ci/wasm-smoke-summary.md`
+
+Deferred to post-`1.0.0`:
+1. `ccml-wasm` package publishing
+2. macOS prebuilt packages
 
 ## Highlights
 1. Rust core remains the single semantic source of truth.
@@ -20,7 +27,7 @@ Included surfaces:
 3. Duplicate-key policy is keep-last with `CCML2001` warnings.
 4. FFI ownership is explicit: Rust allocates returned strings, callers release through `ccml_free`.
 5. Python and Node adapters share parity smoke fixtures.
-6. WASM smoke produces a release-readiness summary artifact.
+6. WASM smoke produces a release-readiness summary artifact without expanding the `v1.0.0` publish scope.
 
 ## Validation Snapshot
 Current local snapshot:
@@ -40,6 +47,8 @@ CI-hosted validation:
 ## Known Limitations
 1. Local Windows environment does not provide `bash`, so bash-only CI scripts and WASM package build are CI/Linux validated.
 2. Publish/tag execution has not been run from this local session.
+3. `v1.0.0` prebuilt binary package scope is Windows x64 and Linux x64.
+4. WASM package publishing and macOS prebuilt packages are post-`1.0.0` work.
 
 ## Release Decision
 `docs/release-go-no-go-week5.md` is marked Go-ready. Publish/tag execution still requires an explicit operator action.

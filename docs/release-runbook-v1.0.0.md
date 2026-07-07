@@ -3,6 +3,26 @@
 ## Purpose
 Define the release execution order and fallback actions for the planned `v1.0.0` release.
 
+## Release Scope
+User-facing package publish scope for `v1.0.0` is Rust, Python, and Node.
+
+Included publish targets:
+1. Rust crates:
+- `ccml-core`
+- `ccml-cli`
+- `ccml-ffi`
+2. Python package:
+- `ccml-py`
+3. Node package:
+- `ccml-node`
+
+Readiness signals, not `v1.0.0` publish targets:
+1. `ccml-wasm`
+- WASM remains a release-readiness smoke signal for this release.
+- WASM package publishing is deferred to post-`1.0.0`.
+2. macOS prebuilt packages
+- macOS prebuilt packaging is deferred to post-`1.0.0`.
+
 ## Preconditions
 1. `docs/release-go-no-go-week5.md` is marked Go.
 2. Target version/tag is fixed.
@@ -33,7 +53,6 @@ Define the release execution order and fallback actions for the planned `v1.0.0`
 - `ccml-core`
 - `ccml-cli`
 - `ccml-ffi`
-- `ccml-wasm`
 2. Python package:
 - `ccml-py`
 3. Node package:
@@ -59,6 +78,9 @@ Define the release execution order and fallback actions for the planned `v1.0.0`
 5. If WASM smoke fails:
 - do not publish `v1.0.0`.
 - inspect `artifacts/ci/wasm-smoke-summary.md` first.
+6. If `ccml-wasm` or macOS package publish questions appear during release execution:
+- keep them out of the `v1.0.0` blocker set.
+- record them as post-`1.0.0` follow-up work.
 
 ## Day 7 Decision Point
 Day 7 decides whether this runbook is executed or whether the week ends with a release-prep closeout.
