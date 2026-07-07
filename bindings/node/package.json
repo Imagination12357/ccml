@@ -18,7 +18,7 @@
     "smoke:day1:regression": "node tests/day1-regression.mjs"
   },
   "dependencies": {
-    "koffi": "^2.14.1"
+    "koffi": "^2.16.2"
   },
   "engines": {
     "node": ">=22"
