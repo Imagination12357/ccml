@@ -2,7 +2,7 @@
 
 All contributions must follow these three principles:
 
-1. **Convenient to humans**
+1. **Convenient for humans**
 2. **Compatible with JSON**
 3. **Clear to parsers**
 

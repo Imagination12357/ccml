@@ -97,7 +97,7 @@ Warning code set:
 
 ## 12. Decision Analysis by 3C
 
-3C = Convenient to humans / Compatible with JSON / Clear to parsers
+3C = Convenient for humans / Compatible with JSON / Clear to parsers
 
 ### 12.1 Duplicate key policy
 - `keep-last`

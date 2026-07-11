@@ -3,7 +3,7 @@
 ## 1. Goal
 - CCML을 MVP 수준에서 프로덕션 배포 가능한 `v1.0.0`으로 재구축한다.
 - 핵심 원칙:
-  - Convenient to humans
+  - Convenient for humans
   - Compatible with JSON (strict)
   - Clear to parsers
 

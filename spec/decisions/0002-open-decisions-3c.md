@@ -7,7 +7,7 @@ Accepted (except CLI output default)
 2026-04-27
 
 ## Principle
-3C = Convenient to humans / Compatible with JSON / Clear to parsers
+3C = Convenient for humans / Compatible with JSON / Clear to parsers
 
 ## Decision A: Duplicate Keys
 

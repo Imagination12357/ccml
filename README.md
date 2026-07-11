@@ -3,7 +3,7 @@
 CCML is a human-friendly configuration language that maps cleanly to JSON.
 
 Project principles:
-1. Convenient to humans
+1. Convenient for humans
 2. Compatible with JSON
 3. Clear to parsers
 
@@ -137,7 +137,7 @@ The C ABI is the stable boundary used by Python and Node bindings. See [spec/int
 CCML exists for configuration files that should be easier to write than JSON without becoming a separate data model.
 
 Its design is governed by 3C, also documented in [CONTRIBUTING.md](CONTRIBUTING.md) and [PROJECT_CHARTER.md](PROJECT_CHARTER.md):
-1. Convenient to humans: less punctuation, comments, and readable key/value files.
+1. Convenient for humans: less punctuation, comments, and readable key/value files.
 2. Compatible with JSON: every valid CCML document maps to one valid JSON value.
 3. Clear to parsers: syntax choices must stay deterministic and easy to diagnose.
 
