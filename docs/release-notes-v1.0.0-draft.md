@@ -1,10 +1,10 @@
 # CCML v1.0.0 Release Notes Draft
 
 ## Status
-Draft for Week 5 release decision. Do not publish until the go/no-go checklist is marked Go.
+Package publish completed for Rust, Python, and Node. Tagging and GitHub Release publication are still pending.
 
 ## Scope
-CCML v1.0.0 is the planned production-ready release track for the Rust-core rebuild.
+CCML v1.0.0 is the production-ready release track for the Rust-core rebuild.
 
 Included surfaces:
 1. Rust core parser and JSON/native conversion path
@@ -46,9 +46,9 @@ CI-hosted validation:
 
 ## Known Limitations
 1. Local Windows environment does not provide `bash`, so bash-only CI scripts and WASM package build are CI/Linux validated.
-2. Publish/tag execution has not been run from this local session.
+2. Git tag and GitHub Release publication have not been completed yet.
 3. `v1.0.0` prebuilt binary package scope is Windows x64 and Linux x64.
 4. WASM package publishing and macOS prebuilt packages are post-`1.0.0` work.
 
 ## Release Decision
-`docs/release-go-no-go-week5.md` is marked Go-ready. Publish/tag execution still requires an explicit operator action.
+`docs/release-go-no-go-week5.md` is marked Go-ready. Rust/Python/Node package publish is complete; tag and GitHub Release publication remain.

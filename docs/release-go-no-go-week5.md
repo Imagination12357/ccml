@@ -3,7 +3,7 @@
 ## Current Decision
 Final Day 7 decision: Go-ready for `v1.0.0` release execution.
 
-Publishing/tagging has not been executed in this local session; it still requires an explicit operator action using `docs/release-runbook-v1.0.0.md`.
+Rust/Python/Node package publishing has been completed by the operator. Tagging and GitHub Release publication remain as final release-record steps.
 
 ## Local Gate Snapshot
 1. Core tests: pass (`11 passed, 0 failed`)
@@ -57,4 +57,4 @@ Mark Go only when:
 ## Go Status
 All Go criteria are satisfied based on local validation plus user-provided CI/WASM evidence.
 
-Next step: execute `docs/release-runbook-v1.0.0.md` when the operator is ready to publish/tag.
+Next step: create and push `v1.0.0`, then publish the GitHub Release using `docs/release-notes-v1.0.0-draft.md`.

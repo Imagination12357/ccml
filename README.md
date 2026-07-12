@@ -33,7 +33,7 @@ It transcodes to one JSON value:
 ```
 
 ### 2. Use the CLI
-After the `v1.0.0` crates.io publish:
+Install the published CLI from crates.io:
 
 ```powershell
 cargo install ccml-cli
@@ -63,7 +63,7 @@ cargo run --offline -p ccml-cli -- conformance ..\..\tests\conformance
 ```
 
 ### 3. Use Rust
-After the `v1.0.0` crates.io publish:
+Use the published Rust crate from crates.io:
 
 ```toml
 [dependencies]
@@ -91,7 +91,7 @@ fn main() -> Result<(), ccml_core::CcmlError> {
 ```
 
 ### 4. Use Python
-After the `v1.0.0` PyPI publish:
+Install the published Python package from PyPI:
 
 ```powershell
 pip install ccml-py
@@ -111,7 +111,7 @@ uv run python -c "from ccml_py import to_json; print(to_json('answer: 42'))"
 `ccml-py` loads the bundled prebuilt `ccml-ffi` library when the installed wheel includes one for your platform. If you are using an unsupported platform or a custom native build, set `CCML_FFI_LIB` to the built library path.
 
 ### 5. Use Node.js
-After the `v1.0.0` npm publish:
+Install the published Node package from npm:
 
 ```powershell
 npm install ccml-node
@@ -179,9 +179,9 @@ This comparison is about design goals, not a complete feature matrix.
 The closest-looking alternative is HJSON. The important distinction is intent: CCML is not "JSON with every convenient relaxation." It is a 3C-constrained configuration language where each syntax feature must justify itself across human convenience, JSON compatibility, and parser clarity. The current release scope and exclusions are tracked in [spec/ccml-1.0-draft.md](spec/ccml-1.0-draft.md) and [docs/release-go-no-go-week5.md](docs/release-go-no-go-week5.md).
 
 ## Status
-This repository is in Week 5 release-preparation for the Rust-core rebuild.
+This repository is on the `v1.0.0` release track for the Rust-core rebuild.
 
-Current package manifests are aligned at `1.0.0`. The planned release target is `v1.0.0`, and release execution is gated by `docs/release-go-no-go-week5.md`.
+Rust, Python, and Node packages have been published at `1.0.0`. Tagging and GitHub Release publication remain as the final release-record steps.
 
 ## What CCML Adds
 CCML keeps the JSON data model while adding a smaller config-oriented syntax:
@@ -303,13 +303,13 @@ node bindings\node\tests\day1-regression.mjs
 ```
 
 ## Release Readiness
-Release-prep documents:
+Release documents:
 1. [docs/pre-release-checklist-week5.md](docs/pre-release-checklist-week5.md)
 2. [docs/release-go-no-go-week5.md](docs/release-go-no-go-week5.md)
 3. [docs/release-notes-v1.0.0-draft.md](docs/release-notes-v1.0.0-draft.md)
 4. [docs/release-runbook-v1.0.0.md](docs/release-runbook-v1.0.0.md)
 
-Current release state is Go-ready according to `docs/release-go-no-go-week5.md`; publish/tag execution still requires an explicit operator action.
+Current release state: Rust/Python/Node package publishing is complete for `v1.0.0`; tag and GitHub Release publication are still pending.
 
 ## Contributing
 Contributions must preserve the project principles in [CONTRIBUTING.md](CONTRIBUTING.md). JSON compatibility is non-negotiable.
