@@ -313,3 +313,6 @@ Current release state: Rust/Python/Node package publishing is complete for `v1.0
 
 ## Contributing
 Contributions must preserve the project principles in [CONTRIBUTING.md](CONTRIBUTING.md). JSON compatibility is non-negotiable.
+
+## Acknowledgments
+This project's Development methodology was inspired by the [Hyper-Waterfall approach](https://github.com/postmelee/hyper-waterfall) used in [rhwp](https://github.com/edwardkim/rhwp/blob/main/mydocs/manual/hyper_waterfall.md)
