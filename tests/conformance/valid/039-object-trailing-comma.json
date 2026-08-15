@@ -1,0 +1,11 @@
+{
+  "schema_version": "1.0.0",
+  "id": "valid.object.trailing_comma.039",
+  "category": "valid",
+  "description": "An object may end with one trailing comma.",
+  "input": "{a:1,}",
+  "expect": {
+    "status": "ok",
+    "output_json": "{\"a\":1}"
+  }
+}

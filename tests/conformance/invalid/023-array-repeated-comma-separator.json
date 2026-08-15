@@ -1,0 +1,16 @@
+{
+  "schema_version": "1.0.0",
+  "id": "invalid.array.repeated_comma_separator.023",
+  "category": "invalid",
+  "description": "Repeated comma separators between array values are rejected.",
+  "input": "[1,,2]",
+  "expect": {
+    "status": "error",
+    "error": {
+      "code": "CCML1001",
+      "line": 1,
+      "column": 4,
+      "message_contains": "separator"
+    }
+  }
+}

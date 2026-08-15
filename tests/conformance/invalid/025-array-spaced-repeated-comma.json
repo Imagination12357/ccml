@@ -1,0 +1,16 @@
+{
+  "schema_version": "1.0.0",
+  "id": "invalid.array.spaced_repeated_comma.025",
+  "category": "invalid",
+  "description": "Two commas remain invalid when whitespace separates them in an array.",
+  "input": "[1, ,2]",
+  "expect": {
+    "status": "error",
+    "error": {
+      "code": "CCML1001",
+      "line": 1,
+      "column": 5,
+      "message_contains": "separator"
+    }
+  }
+}

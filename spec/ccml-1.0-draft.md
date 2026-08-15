@@ -23,17 +23,21 @@ CCML maps to the JSON data model:
 ## 4. Syntax Summary (Draft EBNF)
 ```ebnf
 start       = array | object | object_body ;
-object_body = { pair } ;
-object      = "{" , { pair } , "}" ;
-array       = "[" , [ value , { sep , value } ] , "]" ;
-pair        = key , ":" , value , [ sep ] ;
+object_body = [ pair , { sep , pair } , [ "," ] ] ;
+object      = "{" , object_body , "}" ;
+array       = "[" , [ value , { sep , value } , [ "," ] ] , "]" ;
+pair        = key , ":" , value ;
 key         = bare_key | escaped_string ;
 value       = escaped_string | number | "true" | "false" | "null" | object | array ;
-sep         = whitespace_or_comma ;
+sep         = layout_nonempty | layout , "," , layout ;
+layout_nonempty = ( whitespace | comment ) , layout ;
+layout      = { whitespace | comment } ;
 ```
 
 ## 5. Lexical Rules
 - `escaped_string`: follows JSON string escaping rules.
+  - Unescaped control characters `U+0000` through `U+001F` are invalid.
+  - UTF-16 surrogate escapes MUST form a valid high-surrogate + low-surrogate pair.
 - `number`: follows JSON number lexical form.
 - `comment`: starts with `#` and continues to end of line.
 - `whitespace`: allowed as token separator.
@@ -45,15 +49,19 @@ sep         = whitespace_or_comma ;
 
 ## 6. Semantic Rules
 1. Top-level object braces are optional when document is a sequence of key-value pairs.
-2. Commas are optional separators; whitespace-only separation is valid.
-3. Quoted keys MUST be used when key includes spaces or reserved separators (`:`, `{`, `}`, `[`, `]`, `,`, `#`).
-4. A key in object context always maps to a JSON string key.
-5. Bare keys are case-sensitive and preserve source text exactly (no unescaping).
-6. Tokens `true`, `false`, `null`, or numeric-looking tokens used as keys are treated as string keys (for example, `true: 1` means key `"true"`).
-7. If a bare key token `k` is valid by lexical rules, `k: v` and `"k": v` are semantically equivalent.
-8. Duplicate object keys follow `keep-last` semantics in parse result and transcoded JSON output.
-9. Implementations MUST emit a non-fatal warning diagnostic for every duplicate-key overwrite (`keep-last + warn`).
-10. Tooling MAY provide a strict mode that upgrades duplicate-key warnings to errors.
+2. Whitespace and comments are the primary separators between adjacent array values or object pairs.
+3. A single comma MAY appear within a separator region, with optional whitespace/comments around it.
+4. A separator region MUST NOT contain more than one comma, even when whitespace/comments occur between the commas.
+5. After the final array value or object pair, the trailing separator region MAY contain whitespace/comments and at most one comma.
+6. After the root value, only whitespace and comments are allowed before end of input.
+7. Quoted keys MUST be used when key includes spaces or reserved separators (`:`, `{`, `}`, `[`, `]`, `,`, `#`).
+8. A key in object context always maps to a JSON string key.
+9. Bare keys are case-sensitive and preserve source text exactly (no unescaping).
+10. Tokens `true`, `false`, `null`, or numeric-looking tokens used as keys are treated as string keys (for example, `true: 1` means key `"true"`).
+11. If a bare key token `k` is valid by lexical rules, `k: v` and `"k": v` are semantically equivalent.
+12. Duplicate object keys follow `keep-last` semantics in parse result and transcoded JSON output.
+13. Implementations MUST emit a non-fatal warning diagnostic for every duplicate-key overwrite (`keep-last + warn`).
+14. Tooling MAY provide a strict mode that upgrades duplicate-key warnings to errors.
 
 ## 7. Error Model (Draft)
 Every parser error MUST include:

@@ -118,6 +118,29 @@ mod tests {
     }
 
     #[test]
+    fn rejects_repeated_comma_separators() {
+        for (src, line, column) in [
+            ("[1,,2]", 1, 4),
+            ("[1, ,2]", 1, 5),
+            ("{a:1,,b:2}", 1, 6),
+            ("{a:1,\n,b:2}", 2, 1),
+        ] {
+            let err = parse(src).unwrap_err();
+            assert_eq!(err.diagnostics[0].code, "CCML1001");
+            assert_eq!(err.diagnostics[0].line, line);
+            assert_eq!(err.diagnostics[0].column, column);
+        }
+    }
+
+    #[test]
+    fn preserves_trailing_comma_acceptance() {
+        for (src, expected) in [("[1,]", "[1]"), ("{a:1,}", "{\"a\":1}")] {
+            let json = to_json(src, &ToJsonOptions { pretty: false }).unwrap();
+            assert_eq!(json, expected);
+        }
+    }
+
+    #[test]
     fn rejects_missing_value_after_colon() {
         let src = "a:";
         let err = parse(src).unwrap_err();

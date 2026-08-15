@@ -37,6 +37,10 @@ impl<'a> Parser<'a> {
                 _ => self.parse_implicit_root_object(),
             }?
         };
+        self.skip_ws_and_comments();
+        if !self.eof() {
+            return Err(self.err("CCML1001", "unexpected trailing token"));
+        }
         Ok((ast, self.diagnostics))
     }
 
@@ -87,7 +91,13 @@ impl<'a> Parser<'a> {
             }
             let value = self.parse_value()?;
             self.insert_object_entry(&mut map, key.value, key.line, key.column, value);
-            self.skip_separators();
+            let has_separator = self.consume_separator()?;
+            if self.eof() {
+                break;
+            }
+            if !has_separator {
+                return Err(self.err("CCML1001", "missing separator between object pairs"));
+            }
         }
         Ok(AstNode::Object(map))
     }
@@ -136,7 +146,16 @@ impl<'a> Parser<'a> {
             }
             let value = self.parse_value()?;
             self.insert_object_entry(&mut map, key.value, key.line, key.column, value);
-            self.skip_separators();
+            let has_separator = self.consume_separator()?;
+            if self.peek() == Some('}') {
+                continue;
+            }
+            if self.eof() {
+                return Err(self.err("CCML1005", "mismatched closing delimiter"));
+            }
+            if !has_separator {
+                return Err(self.err("CCML1001", "missing separator between object pairs"));
+            }
         }
         Ok(AstNode::Object(map))
     }
@@ -153,7 +172,16 @@ impl<'a> Parser<'a> {
                 return Err(self.err("CCML1005", "mismatched closing delimiter"));
             }
             out.push(self.parse_value()?);
-            self.skip_separators();
+            let has_separator = self.consume_separator()?;
+            if self.peek() == Some(']') {
+                continue;
+            }
+            if self.eof() {
+                return Err(self.err("CCML1005", "mismatched closing delimiter"));
+            }
+            if !has_separator {
+                return Err(self.err("CCML1001", "missing separator between array values"));
+            }
         }
         Ok(AstNode::Array(out))
     }
@@ -225,17 +253,7 @@ impl<'a> Parser<'a> {
                         'r' => out.push('\r'),
                         't' => out.push('\t'),
                         'u' => {
-                            let code = self.parse_u4_hex()?;
-                            if let Some(ch) = char::from_u32(code) {
-                                out.push(ch);
-                            } else {
-                                return Err(self.err_at(
-                                    "CCML1002",
-                                    "invalid unicode escape",
-                                    start_line,
-                                    start_col,
-                                ));
-                            }
+                            out.push(self.parse_unicode_escape(start_line, start_col)?);
                         }
                         _ => {
                             return Err(self.err_at(
@@ -247,6 +265,14 @@ impl<'a> Parser<'a> {
                         }
                     }
                 }
+                '\u{0000}'..='\u{001f}' => {
+                    return Err(self.err_at(
+                        "CCML1002",
+                        "unescaped control character in string",
+                        start_line,
+                        start_col,
+                    ));
+                }
                 _ => {
                     out.push(ch);
                     self.bump();
@@ -254,6 +280,58 @@ impl<'a> Parser<'a> {
             }
         }
         Err(self.err_at("CCML1002", "unterminated string", start_line, start_col))
+    }
+
+    fn parse_unicode_escape(
+        &mut self,
+        string_line: usize,
+        string_col: usize,
+    ) -> Result<char, CcmlError> {
+        let first = self.parse_u4_hex()?;
+        if (0xd800..=0xdbff).contains(&first) {
+            if !self.match_char('\\') || !self.match_char('u') {
+                return Err(self.err_at(
+                    "CCML1002",
+                    "invalid unicode escape",
+                    string_line,
+                    string_col,
+                ));
+            }
+            let second = self.parse_u4_hex()?;
+            if !(0xdc00..=0xdfff).contains(&second) {
+                return Err(self.err_at(
+                    "CCML1002",
+                    "invalid unicode escape",
+                    string_line,
+                    string_col,
+                ));
+            }
+            let scalar = 0x10000 + ((first - 0xd800) << 10) + (second - 0xdc00);
+            return char::from_u32(scalar).ok_or_else(|| {
+                self.err_at(
+                    "CCML1002",
+                    "invalid unicode escape",
+                    string_line,
+                    string_col,
+                )
+            });
+        }
+        if (0xdc00..=0xdfff).contains(&first) {
+            return Err(self.err_at(
+                "CCML1002",
+                "invalid unicode escape",
+                string_line,
+                string_col,
+            ));
+        }
+        char::from_u32(first).ok_or_else(|| {
+            self.err_at(
+                "CCML1002",
+                "invalid unicode escape",
+                string_line,
+                string_col,
+            )
+        })
     }
 
     fn parse_u4_hex(&mut self) -> Result<u32, CcmlError> {
@@ -346,17 +424,16 @@ impl<'a> Parser<'a> {
         Ok(())
     }
 
-    fn skip_separators(&mut self) {
-        loop {
-            let before = self.idx;
+    fn consume_separator(&mut self) -> Result<bool, CcmlError> {
+        let start = self.idx;
+        self.skip_ws_and_comments();
+        if self.match_char(',') {
             self.skip_ws_and_comments();
-            if self.match_char(',') {
-                self.skip_ws_and_comments();
-            }
-            if self.idx == before {
-                break;
+            if self.peek() == Some(',') {
+                return Err(self.err("CCML1001", "repeated comma separator"));
             }
         }
+        Ok(self.idx != start)
     }
 
     fn skip_ws_and_comments(&mut self) {

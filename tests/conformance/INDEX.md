@@ -1,9 +1,9 @@
 # CCML Conformance Vector Index
 
 ## Summary
-- Total cases: 76
-- valid: 37
-- invalid: 22
+- Total cases: 82
+- valid: 39
+- invalid: 26
 - warn: 17
 
 ## Schema
@@ -20,6 +20,7 @@
 - whitespace separators
 - comma separators
 - mixed separators
+- one trailing comma in arrays and objects
 - implicit and explicit root object
 
 3. Comments
@@ -51,6 +52,7 @@
 - invalid exponent boundary positions
 - trailing tokens after explicit root values
 - missing collection separators
+- repeated comma separators, including commas separated by whitespace
 - unescaped string control characters
 - unpaired Unicode surrogates
 

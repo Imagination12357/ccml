@@ -1,0 +1,16 @@
+{
+  "schema_version": "1.0.0",
+  "id": "invalid.object.repeated_comma_separator.024",
+  "category": "invalid",
+  "description": "Repeated comma separators between object pairs are rejected.",
+  "input": "{a:1,,b:2}",
+  "expect": {
+    "status": "error",
+    "error": {
+      "code": "CCML1001",
+      "line": 1,
+      "column": 6,
+      "message_contains": "separator"
+    }
+  }
+}
