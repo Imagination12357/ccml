@@ -1,0 +1,16 @@
+{
+  "schema_version": "1.0.0",
+  "id": "invalid.unicode.unpaired_low_surrogate.022",
+  "category": "invalid",
+  "description": "An unpaired low surrogate escape is rejected.",
+  "input": "s: \"\\uDE00\"",
+  "expect": {
+    "status": "error",
+    "error": {
+      "code": "CCML1002",
+      "line": 1,
+      "column": 4,
+      "message_contains": "unicode"
+    }
+  }
+}

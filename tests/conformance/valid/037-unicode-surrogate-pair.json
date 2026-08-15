@@ -1,0 +1,11 @@
+{
+  "schema_version": "1.0.0",
+  "id": "valid.unicode.surrogate_pair.037",
+  "category": "valid",
+  "description": "A valid UTF-16 surrogate pair escape decodes to one Unicode scalar value.",
+  "input": "emoji: \"\\uD83D\\uDE00\"",
+  "expect": {
+    "status": "ok",
+    "output_json": "{\"emoji\":\"😀\"}"
+  }
+}

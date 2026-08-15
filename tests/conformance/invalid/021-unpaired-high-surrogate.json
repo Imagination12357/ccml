@@ -1,0 +1,16 @@
+{
+  "schema_version": "1.0.0",
+  "id": "invalid.unicode.unpaired_high_surrogate.021",
+  "category": "invalid",
+  "description": "An unpaired high surrogate escape is rejected.",
+  "input": "s: \"\\uD83D\"",
+  "expect": {
+    "status": "error",
+    "error": {
+      "code": "CCML1002",
+      "line": 1,
+      "column": 4,
+      "message_contains": "unicode"
+    }
+  }
+}

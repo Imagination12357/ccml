@@ -1,0 +1,16 @@
+{
+  "schema_version": "1.0.0",
+  "id": "invalid.object.missing_separator.019",
+  "category": "invalid",
+  "description": "Adjacent object pairs without whitespace or a comma are rejected.",
+  "input": "{a:1b:2}",
+  "expect": {
+    "status": "error",
+    "error": {
+      "code": "CCML1001",
+      "line": 1,
+      "column": 5,
+      "message_contains": "separator"
+    }
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "schema_version": "1.0.0",
+  "id": "invalid.string.unescaped_control.020",
+  "category": "invalid",
+  "description": "An unescaped control character in a string is rejected.",
+  "input": "s: \"a\u0001b\"",
+  "expect": {
+    "status": "error",
+    "error": {
+      "code": "CCML1002",
+      "line": 1,
+      "column": 4,
+      "message_contains": "string"
+    }
+  }
+}

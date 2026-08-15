@@ -72,6 +72,52 @@ mod tests {
     }
 
     #[test]
+    fn parses_unicode_surrogate_pair() {
+        let src = "emoji: \"\\uD83D\\uDE00\"";
+        let json = to_json(src, &ToJsonOptions { pretty: false }).unwrap();
+        assert_eq!(json, "{\"emoji\":\"😀\"}");
+    }
+
+    #[test]
+    fn rejects_unpaired_unicode_surrogates() {
+        for src in ["s: \"\\uD83D\"", "s: \"\\uDE00\""] {
+            let err = parse(src).unwrap_err();
+            assert_eq!(err.diagnostics[0].code, "CCML1002");
+            assert_eq!(err.diagnostics[0].line, 1);
+            assert_eq!(err.diagnostics[0].column, 4);
+        }
+    }
+
+    #[test]
+    fn rejects_unescaped_control_character_in_string() {
+        let src = "s: \"a\u{0001}b\"";
+        let err = parse(src).unwrap_err();
+        assert_eq!(err.diagnostics[0].code, "CCML1002");
+        assert_eq!(err.diagnostics[0].line, 1);
+        assert_eq!(err.diagnostics[0].column, 4);
+    }
+
+    #[test]
+    fn rejects_trailing_tokens_after_explicit_root() {
+        for (src, column) in [("{\"a\":1} trailing", 9), ("[1] 2", 5)] {
+            let err = parse(src).unwrap_err();
+            assert_eq!(err.diagnostics[0].code, "CCML1001");
+            assert_eq!(err.diagnostics[0].line, 1);
+            assert_eq!(err.diagnostics[0].column, column);
+        }
+    }
+
+    #[test]
+    fn rejects_missing_collection_separators() {
+        for (src, column) in [("[truefalse]", 6), ("{a:1b:2}", 5)] {
+            let err = parse(src).unwrap_err();
+            assert_eq!(err.diagnostics[0].code, "CCML1001");
+            assert_eq!(err.diagnostics[0].line, 1);
+            assert_eq!(err.diagnostics[0].column, column);
+        }
+    }
+
+    #[test]
     fn rejects_missing_value_after_colon() {
         let src = "a:";
         let err = parse(src).unwrap_err();

@@ -1,9 +1,9 @@
 # CCML Conformance Vector Index
 
 ## Summary
-- Total cases: 68
-- valid: 36
-- invalid: 15
+- Total cases: 76
+- valid: 37
+- invalid: 22
 - warn: 17
 
 ## Schema
@@ -37,6 +37,7 @@
 - negative and exponent numbers
 - escaped strings
 - unicode escape decoding
+- UTF-16 surrogate pair decoding
 - uppercase exponent and negative-zero numeric forms
 
 6. Diagnostics
@@ -48,6 +49,10 @@
 - invalid number format
 - newline boundary failures after comments/pairs
 - invalid exponent boundary positions
+- trailing tokens after explicit root values
+- missing collection separators
+- unescaped string control characters
+- unpaired Unicode surrogates
 
 7. Duplicate key policy
 - default behavior: keep-last

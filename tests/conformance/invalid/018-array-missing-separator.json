@@ -1,0 +1,16 @@
+{
+  "schema_version": "1.0.0",
+  "id": "invalid.array.missing_separator.018",
+  "category": "invalid",
+  "description": "Adjacent array values without whitespace or a comma are rejected.",
+  "input": "[truefalse]",
+  "expect": {
+    "status": "error",
+    "error": {
+      "code": "CCML1001",
+      "line": 1,
+      "column": 6,
+      "message_contains": "separator"
+    }
+  }
+}
