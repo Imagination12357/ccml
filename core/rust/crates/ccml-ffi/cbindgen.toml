@@ -12,6 +12,7 @@ parse_deps = false
 include = [
   "CcmlStatus",
   "ccml_to_json",
+  "ccml_to_json_with_diagnostics",
   "ccml_diagnose",
   "ccml_version",
   "ccml_free",

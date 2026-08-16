@@ -147,7 +147,7 @@ node --input-type=module -e "const { createCcmlFfi } = await import('./src/index
 `ccml-node` loads the bundled prebuilt `ccml-ffi` library when the installed package includes one for your platform. If you are using an unsupported platform or a custom native build, set `CCML_FFI_LIB` to the built library path.
 
 ### 6. Use the C ABI
-The C ABI is the stable boundary used by Python and Node bindings. See [spec/interfaces/ffi-phase1-interface.md](spec/interfaces/ffi-phase1-interface.md) for function signatures, status codes, memory ownership, and error payload rules.
+The C ABI is the stable boundary used by Python and Node bindings. See [spec/interfaces/ffi-phase1-interface.md](spec/interfaces/ffi-phase1-interface.md) for the frozen baseline and [spec/interfaces/ffi-detailed-transcode-interface.md](spec/interfaces/ffi-detailed-transcode-interface.md) for the additive single-parse JSON + diagnostics function.
 
 ## Why CCML?
 CCML exists for configuration files that should be easier to write than JSON without becoming a separate data model.

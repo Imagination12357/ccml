@@ -1,4 +1,6 @@
-use ccml_core::{diagnose, to_json, Diagnostic, Severity, ToJsonOptions};
+use ccml_core::{
+    diagnose, to_json, to_json_with_diagnostics, Diagnostic, Severity, ToJsonOptions,
+};
 use std::ffi::{c_char, CString};
 use std::ptr;
 
@@ -63,6 +65,85 @@ pub extern "C" fn ccml_to_json(
                 out_error_json,
                 CcmlStatus::InternalError,
                 "panic in ccml_to_json",
+            );
+            CcmlStatus::InternalError as i32
+        }
+    }
+}
+
+#[unsafe(no_mangle)]
+pub extern "C" fn ccml_to_json_with_diagnostics(
+    input_ptr: *const u8,
+    input_len: usize,
+    out_json: *mut *mut c_char,
+    out_diag_json: *mut *mut c_char,
+    out_error_json: *mut *mut c_char,
+) -> i32 {
+    if !validate_detailed_args(
+        input_ptr,
+        input_len,
+        out_json,
+        out_diag_json,
+        out_error_json,
+    ) {
+        return CcmlStatus::InvalidArgument as i32;
+    }
+
+    clear_out(out_json);
+    clear_out(out_diag_json);
+    clear_out(out_error_json);
+
+    let result = std::panic::catch_unwind(|| {
+        let input = decode_input(input_ptr, input_len)?;
+        match to_json_with_diagnostics(&input, &ToJsonOptions { pretty: false }) {
+            Ok((json, diagnostics)) => {
+                let diagnostics_json = diagnostics_json_payload(&diagnostics);
+                let json_c_string = CString::new(json).map_err(|_| {
+                    (
+                        "failed to allocate output json".to_string(),
+                        CcmlStatus::InternalError,
+                    )
+                })?;
+                let diagnostics_c_string = CString::new(diagnostics_json).map_err(|_| {
+                    (
+                        "failed to allocate diagnostics json".to_string(),
+                        CcmlStatus::InternalError,
+                    )
+                })?;
+
+                // Safety: all out-pointers were validated above. Both C strings are
+                // prepared before either pointer is transferred to the caller.
+                unsafe {
+                    *out_json = json_c_string.into_raw();
+                    *out_diag_json = diagnostics_c_string.into_raw();
+                }
+                Ok(CcmlStatus::Ok)
+            }
+            Err(err) => {
+                let payload = error_payload_with_diagnostics(
+                    CcmlStatus::ParseError,
+                    "ccml parse error",
+                    &err.diagnostics,
+                );
+                let _ = write_owned_c_string(out_error_json, &payload);
+                Err(("ccml parse error".to_string(), CcmlStatus::ParseError))
+            }
+        }
+    });
+
+    match result {
+        Ok(Ok(status)) => status as i32,
+        Ok(Err((msg, status))) => {
+            if status != CcmlStatus::ParseError {
+                write_error_json(out_error_json, status, &msg);
+            }
+            status as i32
+        }
+        Err(_) => {
+            write_error_json(
+                out_error_json,
+                CcmlStatus::InternalError,
+                "panic in ccml_to_json_with_diagnostics",
             );
             CcmlStatus::InternalError as i32
         }
@@ -150,6 +231,17 @@ fn validate_common_args(
         return false;
     }
     true
+}
+
+fn validate_detailed_args(
+    input_ptr: *const u8,
+    input_len: usize,
+    out_json: *mut *mut c_char,
+    out_diag_json: *mut *mut c_char,
+    out_error_json: *mut *mut c_char,
+) -> bool {
+    !out_diag_json.is_null()
+        && validate_common_args(input_ptr, input_len, out_json, out_error_json)
 }
 
 fn clear_out(out: *mut *mut c_char) {
@@ -242,9 +334,14 @@ fn escape_json_string(input: &str) -> String {
         match ch {
             '"' => out.push_str("\\\""),
             '\\' => out.push_str("\\\\"),
+            '\u{0008}' => out.push_str("\\b"),
+            '\u{000c}' => out.push_str("\\f"),
             '\n' => out.push_str("\\n"),
             '\r' => out.push_str("\\r"),
             '\t' => out.push_str("\\t"),
+            '\u{0000}'..='\u{001f}' => {
+                out.push_str(&format!("\\u{:04x}", ch as u32));
+            }
             _ => out.push(ch),
         }
     }
@@ -378,6 +475,137 @@ mod tests {
         let diag = into_string_and_free(out_diag);
         assert!(diag.contains("\"code\":\"CCML2001\""));
         assert!(diag.contains("\"severity\":\"warning\""));
+    }
+
+    #[test]
+    fn diagnose_escapes_control_characters_in_warning_payload() {
+        let input = br#""\u0000": 1
+"\u0000": 2"#;
+        let mut out_diag: *mut c_char = ptr::null_mut();
+        let mut out_err: *mut c_char = ptr::null_mut();
+
+        let rc = ccml_diagnose(
+            input.as_ptr(),
+            input.len(),
+            &mut out_diag as *mut *mut c_char,
+            &mut out_err as *mut *mut c_char,
+        );
+        assert_eq!(rc, CcmlStatus::Ok as i32);
+        assert!(out_err.is_null());
+
+        let payload = into_string_and_free(out_diag);
+        let diagnostics: Value = serde_json::from_str(&payload).expect("valid diagnostics json");
+        assert_eq!(diagnostics[0]["code"], "CCML2001");
+        assert_eq!(diagnostics[0]["severity"], "warning");
+    }
+
+    #[test]
+    fn detailed_transcode_returns_json_and_empty_diagnostics() {
+        let input = b"a: 1";
+        let mut out_json: *mut c_char = ptr::null_mut();
+        let mut out_diag: *mut c_char = ptr::null_mut();
+        let mut out_err: *mut c_char = ptr::null_mut();
+
+        let rc = ccml_to_json_with_diagnostics(
+            input.as_ptr(),
+            input.len(),
+            &mut out_json as *mut *mut c_char,
+            &mut out_diag as *mut *mut c_char,
+            &mut out_err as *mut *mut c_char,
+        );
+        assert_eq!(rc, CcmlStatus::Ok as i32);
+        assert!(out_err.is_null());
+        assert_eq!(into_string_and_free(out_json), "{\"a\":1}");
+        assert_eq!(into_string_and_free(out_diag), "[]");
+    }
+
+    #[test]
+    fn detailed_transcode_returns_warning_from_same_parse() {
+        let input = b"x: 1\nx: 2";
+        let mut out_json: *mut c_char = ptr::null_mut();
+        let mut out_diag: *mut c_char = ptr::null_mut();
+        let mut out_err: *mut c_char = ptr::null_mut();
+
+        let rc = ccml_to_json_with_diagnostics(
+            input.as_ptr(),
+            input.len(),
+            &mut out_json as *mut *mut c_char,
+            &mut out_diag as *mut *mut c_char,
+            &mut out_err as *mut *mut c_char,
+        );
+        assert_eq!(rc, CcmlStatus::Ok as i32);
+        assert!(out_err.is_null());
+        assert_eq!(into_string_and_free(out_json), "{\"x\":2}");
+
+        let payload = into_string_and_free(out_diag);
+        let diagnostics: Value = serde_json::from_str(&payload).expect("valid diagnostics json");
+        assert_eq!(diagnostics[0]["code"], "CCML2001");
+        assert_eq!(diagnostics[0]["severity"], "warning");
+    }
+
+    #[test]
+    fn detailed_transcode_parse_error_uses_error_envelope() {
+        let input = b"a:";
+        let mut out_json: *mut c_char = ptr::null_mut();
+        let mut out_diag: *mut c_char = ptr::null_mut();
+        let mut out_err: *mut c_char = ptr::null_mut();
+
+        let rc = ccml_to_json_with_diagnostics(
+            input.as_ptr(),
+            input.len(),
+            &mut out_json as *mut *mut c_char,
+            &mut out_diag as *mut *mut c_char,
+            &mut out_err as *mut *mut c_char,
+        );
+        assert_eq!(rc, CcmlStatus::ParseError as i32);
+        assert!(out_json.is_null());
+        assert!(out_diag.is_null());
+
+        let payload = into_string_and_free(out_err);
+        let error: Value = serde_json::from_str(&payload).expect("valid error json");
+        assert_eq!(error["error_code"], "ParseError");
+        assert_eq!(error["diagnostics"][0]["severity"], "error");
+    }
+
+    #[test]
+    fn detailed_transcode_rejects_null_diagnostics_out_pointer() {
+        let input = b"a: 1";
+        let mut out_json: *mut c_char = ptr::null_mut();
+        let mut out_err: *mut c_char = ptr::null_mut();
+
+        let rc = ccml_to_json_with_diagnostics(
+            input.as_ptr(),
+            input.len(),
+            &mut out_json as *mut *mut c_char,
+            ptr::null_mut(),
+            &mut out_err as *mut *mut c_char,
+        );
+        assert_eq!(rc, CcmlStatus::InvalidArgument as i32);
+        assert!(out_json.is_null());
+        assert!(out_err.is_null());
+    }
+
+    #[test]
+    fn detailed_transcode_invalid_utf8_uses_error_envelope() {
+        let input: [u8; 1] = [0xff];
+        let mut out_json: *mut c_char = ptr::null_mut();
+        let mut out_diag: *mut c_char = ptr::null_mut();
+        let mut out_err: *mut c_char = ptr::null_mut();
+
+        let rc = ccml_to_json_with_diagnostics(
+            input.as_ptr(),
+            input.len(),
+            &mut out_json as *mut *mut c_char,
+            &mut out_diag as *mut *mut c_char,
+            &mut out_err as *mut *mut c_char,
+        );
+        assert_eq!(rc, CcmlStatus::InvalidUtf8 as i32);
+        assert!(out_json.is_null());
+        assert!(out_diag.is_null());
+
+        let payload = into_string_and_free(out_err);
+        let error: Value = serde_json::from_str(&payload).expect("valid error json");
+        assert_eq!(error["error_code"], "InvalidUtf8");
     }
 
     #[test]
