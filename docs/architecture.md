@@ -81,6 +81,7 @@ Program -> Services -> Feature Groups -> Files
 ### 4.1 Core Public API Contract
 - `parse(text) -> ast`
 - `to_json(text, options) -> json_string`
+- `to_json_with_diagnostics(text, options) -> (json_string, diagnostics)`
 - `diagnose(text) -> [diagnostic]`
 
 ### 4.2 Diagnostic Contract

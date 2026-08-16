@@ -55,6 +55,8 @@ Output:
 }
 ```
 
+The CLI writes transcoded JSON to stdout. When a duplicate key is overwritten by the keep-last policy, it writes warning `CCML2001` to stderr and still exits with status `0`. Parse errors are written to stderr and exit with status `1`.
+
 Run the shared conformance vectors from source:
 
 ```powershell
@@ -88,6 +90,20 @@ fn main() -> Result<(), ccml_core::CcmlError> {
     assert_eq!(json, "{\"enabled\":true,\"name\":\"Ada\"}");
     Ok(())
 }
+```
+
+Use `to_json_with_diagnostics` when the JSON output and non-fatal diagnostics must come from the same parse:
+
+```rust
+use ccml_core::{to_json_with_diagnostics, ToJsonOptions};
+
+let (json, diagnostics) = to_json_with_diagnostics(
+    "x: 1\nx: 2",
+    &ToJsonOptions { pretty: false },
+)
+.unwrap();
+assert_eq!(json, "{\"x\":2}");
+assert_eq!(diagnostics[0].code, "CCML2001");
 ```
 
 ### 4. Use Python

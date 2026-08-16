@@ -1,4 +1,6 @@
-use ccml_core::{diagnose, parse, to_json, AstNode, ToJsonOptions};
+use ccml_core::{
+    diagnose, parse, to_json, to_json_with_diagnostics, AstNode, Severity, ToJsonOptions,
+};
 use jsonschema::JSONSchema;
 use serde::Deserialize;
 use std::fs;
@@ -57,11 +59,24 @@ fn main() {
         std::process::exit(2);
     }
 
-    match to_json(&input, &ToJsonOptions::default()) {
-        Ok(json) => println!("{json}"),
+    match to_json_with_diagnostics(&input, &ToJsonOptions::default()) {
+        Ok((json, diagnostics)) => {
+            println!("{json}");
+            for d in diagnostics {
+                if d.severity == Severity::Warning {
+                    eprintln!(
+                        "{}:{} warning {} {}",
+                        d.line, d.column, d.code, d.message
+                    );
+                }
+            }
+        }
         Err(err) => {
             for d in err.diagnostics {
-                eprintln!("{}:{} {} {}", d.line, d.column, d.code, d.message);
+                eprintln!(
+                    "{}:{} error {} {}",
+                    d.line, d.column, d.code, d.message
+                );
             }
             std::process::exit(1);
         }

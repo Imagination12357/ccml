@@ -30,8 +30,15 @@ fn parse_with_diagnostics(text: &str) -> Result<(AstNode, Vec<Diagnostic>), Ccml
 }
 
 pub fn to_json(text: &str, options: &ToJsonOptions) -> Result<String, CcmlError> {
-    let ast = parse(text)?;
-    Ok(to_json_string(&ast, options.pretty))
+    to_json_with_diagnostics(text, options).map(|(json, _)| json)
+}
+
+pub fn to_json_with_diagnostics(
+    text: &str,
+    options: &ToJsonOptions,
+) -> Result<(String, Vec<Diagnostic>), CcmlError> {
+    let (ast, diagnostics) = parse_with_diagnostics(text)?;
+    Ok((to_json_string(&ast, options.pretty), diagnostics))
 }
 
 pub fn to_native(text: &str) -> Result<NativeValue, CcmlError> {
@@ -175,6 +182,18 @@ mod tests {
         let src = "x: 1\nx: 2";
         let json = to_json(src, &ToJsonOptions { pretty: false }).unwrap();
         let diagnostics = diagnose(src);
+        assert_eq!(json, "{\"x\":2}");
+        assert_eq!(diagnostics.len(), 1);
+        assert_eq!(diagnostics[0].code, "CCML2001");
+        assert_eq!(diagnostics[0].severity, Severity::Warning);
+    }
+
+    #[test]
+    fn returns_json_and_diagnostics_from_one_transcode() {
+        let src = "x: 1\nx: 2";
+        let (json, diagnostics) =
+            to_json_with_diagnostics(src, &ToJsonOptions { pretty: false }).unwrap();
+
         assert_eq!(json, "{\"x\":2}");
         assert_eq!(diagnostics.len(), 1);
         assert_eq!(diagnostics[0].code, "CCML2001");
